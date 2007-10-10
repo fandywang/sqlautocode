@@ -1,0 +1,49 @@
+
+0.4 (UNRELEASED)
+
+	- Restructured code to make this module more project like
+	  and to ease the code management.
+	  [spamsch]
+	
+	- Support for globbing character in table names
+	  [spamsch]
+
+	- More robust argument handling
+	  [spamsch]
+
+	- Making schema and table selection possible
+	  [spamsch]
+
+	- Make autocode generate some example code
+	  [spamsch]
+
+	- Fixed some minor bugs
+	  [spamsch]
+
+	- Add full commandline support and some options
+	  [spamsch]
+
+0.3 (25.07.2007) 
+
+	- Simplified code a bit
+	  [sdobrev]
+
+	- Added SQLite and PostGres support
+	  [sdobrev]
+
+0.2 (17.07.2007)
+
+	- Takes arguments on the command line to select the dburl and
+   	  the output destination
+	  [cdevienne]
+	 
+   	- Replace a bunch of database specific types by generic ones.
+   	  This is incomplete as it feats only my needs for a mysql to mssql
+   	  database conversion.
+	  [cdevienne]
+	  
+   	- Output the indexes and ForeignKeyConstraints (including multi-columns
+      ones) correctly
+	  [cdevienne]
+
+0.1 (24.02.2007)
