@@ -20,13 +20,13 @@ Authors:
 
 License:
     
-    GNU Lesser General Public License
+    MIT
     see license.txt
 
 Requirements:
 
     sqlalchemy 0.3.9+
-    Currently NOT tested with sqlalchemy 0.4+
+    Not know to work with 0.4!
 
 Documentation:
 
