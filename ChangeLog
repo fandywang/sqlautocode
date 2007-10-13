@@ -1,5 +1,8 @@
 
-0.4 (UNRELEASED)
+0.4.1 (UNRELEASED)
+
+
+0.4 (10.10.2007)
 
 	- Restructured code to make this module more project like
 	  and to ease the code management.
