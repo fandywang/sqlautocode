@@ -8,7 +8,7 @@ if __name__ == '__main__':
 
     import sys, getopt, os
     
-    args, longargs = ('hu:o:s:t:i', ['help', 'url=', 'output=', 'schema=', 'tables=', 'noindex'])
+    args, longargs = ('hu:o:s:t:i3', ['help', 'url=', 'output=', 'schema=', 'tables=', 'noindex', 'z3c'])
 
     try:
         optlist, args = getopt.getopt(sys.argv[1:], args, longargs)
@@ -22,7 +22,9 @@ if __name__ == '__main__':
         print >>sys.stderr, constants.USAGE
         sys.exit(0)
 
-    url, output, schema, tables, filehandle, noindex, example = (None, None, None, None, None, None, False)
+    url, output, schema, tables, \
+            filehandle, noindex, \
+            example, z3c = (None, None, None, None, None, None, False, False)
     for opt, arg in optlist:
         if opt in ['-h', '--help']:
             print >>sys.stderr, constants.USAGE
@@ -36,6 +38,10 @@ if __name__ == '__main__':
 
         if opt in ['-e', '--example']:
             example = True
+
+        if opt in ['-3', '--z3c']:
+            z3c = True
+            constants.TAB = 26*' '
             
         if opt in ['-o', '--output']:
             output = arg
@@ -70,7 +76,9 @@ if __name__ == '__main__':
     metadata = BoundMetaData(db)
 
     # some header with imports 
-    printout(constants.HEADER, filehandle)
+    if z3c is True:
+        printout(constants.HEADER_Z3C, filehandle)
+    else: printout(constants.HEADER, filehandle)
     
     tablenames = autoloader.table_names
 
@@ -80,6 +88,10 @@ if __name__ == '__main__':
             print >>sys.stderr, 'Error: Ambigous table name (%s) detected. Please specifiy a schema (--schema)!' % tbname
             if filehandle: filehandle.close()
             sys.exit(7)
+
+        # only include tables for the given schema
+        if schema != None:
+            if tbschema != schema: continue
 
         tbmapping[tbname] = tbschema
     
@@ -120,7 +132,10 @@ if __name__ == '__main__':
 
                         tablenames.append( (t2name, tschema2) )
 
+    # do the hard work
     for tname,tschema in tablenames:
+        if not tbmapping.has_key(tname): continue
+
         tname = tname.encode( 'utf-8')
         print >>sys.stderr, "Generating python model for table %s" % tname
 
@@ -137,11 +152,23 @@ if __name__ == '__main__':
         for c in table.columns:
             c.type = autoloader.coltypes[ c.type.__class__ ]()
             
-        printout('\n\n%s %s %s' % (tname, '=', repr(table)), filehandle)
+        INC = '\n\n'
+        if z3c is True:
+            INC = INC + 4*' '
 
+        printout(INC+'%s %s %s' % (tname, '=', repr(table)), filehandle)
+
+        if z3c is True:
+            printout(INC + \
+                    'class %(tn)sObject(MappedClassBase): pass\n    mapper(%(tn)sObject, %(tn)s)' \
+                    % {'tn':tname}, filehandle)
+
+    if z3c is True:
+        printout('\n' + constants.FOOTER_Z3C, filehandle)
+    
     # print some example
     if example is True:
-        printout('\n' + constants.FOOTER % {'url' : url, 'tablename' : tablenames[0][0]}, filehandle)
+        printout('\n' + constants.FOOTER_EXAMPLE % {'url' : url, 'tablename' : tablenames[0][0]}, filehandle)
     
     if filehandle != None: 
         printout("\n", filehandle)

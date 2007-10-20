@@ -1,6 +1,11 @@
 
 0.4.1 (UNRELEASED)
 
+	- Added support for z3c.sqlalchemy
+	  [spamsch]
+
+	- Refactored some code
+	  [spamsch]
 
 0.4 (10.10.2007)
 
