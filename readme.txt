@@ -26,7 +26,7 @@ License:
 Requirements:
 
     sqlalchemy 0.3.9+
-    Not know to work with 0.4!
+    Not known to work with 0.4!
 
 Documentation:
 
@@ -39,23 +39,10 @@ ToDo:
 
     + Test with different dialects
     + Add support for automagically creating relations
-    + Generate ActiveMapper / Elixir / z3c.sqlalchemy model
+    + Generate ActiveMapper / Elixir model
 
 Notes (random):
 
     metadata stuff from:
     http://sqlzoo.cn/howto/source/z.dir/tip137084/i12meta.xml
 
-    sqlite: SELECT * FROM sqlite_master WHERE type='table'
-        tables and indexes
-    pg: SELECT tablename FROM pg_tables WHERE tableowner = current_user
-    mysql: show tables
-        ????????????
-    ms? SQLserver: SELECT * FROM sysobjects WHERE xtype='U'
-        see also sp_table and table sysobjects
-    access: SELECT Name FROM MSysObjects WHERE Type=1 AND Flags=0
-    oracle: SELECT * FROM cat
-        see also user_tables and user_catalog
-    sybase: SELECT * FROM sysobjects WHERE type='U'
-    mimer:  SELECT * FROM information_schema.tables WHERE table_type='BASE TABLE'
-    db2: SELECT * FROM syscat.tables WHERE tabschema = '<schemaname>'

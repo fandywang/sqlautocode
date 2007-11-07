@@ -1,3 +1,12 @@
+
+import sys
+import sqlalchemy
+if sqlalchemy.__version__.split('.')[1] != '3':
+    print 'Not compatible with this version of SQLAlchemy! Only works for the 0.3.x line!'
+    sys.exit(7)
+
+del sqlalchemy
+
 from sqlalchemy import *
 
 import constants
@@ -7,8 +16,8 @@ from formatter import *
 if __name__ == '__main__':
 
     import sys, getopt, os
-    
-    args, longargs = ('hu:o:s:t:i3', ['help', 'url=', 'output=', 'schema=', 'tables=', 'noindex', 'z3c'])
+
+    args, longargs = ('hu:o:s:t:i3e', ['help', 'url=', 'output=', 'schema=', 'tables=', 'noindex', 'z3c', 'example'])
 
     try:
         optlist, args = getopt.getopt(sys.argv[1:], args, longargs)
