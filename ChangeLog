@@ -1,4 +1,7 @@
 0.5.2 (UNRELEASED)
+	- Added setuptools script for project management.
+	  [jaraco]
+	  
 	- Fixed issue with sqlalchemy version checking when it contains non-numeric characters (Issue 7).
 	  [jaraco]
 	  
