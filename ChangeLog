@@ -1,4 +1,7 @@
 0.5.2 (UNRELEASED)
+	- Fixed issue with sqlalchemy version checking when it contains non-numeric characters (Issue 7).
+	  [jaraco]
+	  
 	- Implemented workaround for issue 9: schema handling when no schema is specified.
 	  [jaraco]
 
