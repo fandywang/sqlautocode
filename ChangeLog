@@ -1,7 +1,78 @@
+0.5.1 (10.01.2008)
+        - Table matching is now chattier about misses.
+	  [jek]
+        
+	- Table globbing now supports the full glob syntax
+	  [jek]
+	 
+	- Tables in --tables can be "quot*ed" to escape globbing chars.
+	  [jek]
+	
+        - Engine url is no longer an -option (it's required!)
+	  New syntax is 'autocode.py dburl://...'
+	  [jek]
 
-0.4.1 (13.11.2007)
+	- Detection of a SQLAlchemy installation is now a little friendlier.
+	  [jek]
 
-	- Fixed commandline bug
+	- Can now choose the generated file --encoding.
+	  [jek]
+
+	- Handling of multi-byte and funk$ky schema identifiers is improved
+	  but not yet 100%.
+	  [jek]
+	
+        - Fixed example code
+	  [jek]
+	
+        - Fix for indexes with funky$column-names
+	  [jek]
+
+        - Indexes now repr like other schema items
+	  [jek]
+	
+	- Column types now emit their arguments (e.g. VARCHAR(32))
+	  [jek]
+
+	- Fixed parse errors in emitted column definitions
+	  [jek]
+
+	- Casting to generic column types is now optional
+	  [jek]
+
+	- Fixed logic when casting to a generic column type
+	  [jek]
+
+	- Fixed Python 2.5 compatibility issue
+	  [jek]
+
+	- Only emitting schema= on Tables when --schema is present
+	  [jek]
+	  
+	- Fixed index generation
+	  [jek]
+	
+0.5 (13.11.2007)
+
+	- Fixed example code to use limit()
+	  [spamsch]
+
+	- Fixed formatter to handle types correctly
+	  [spamsch]
+
+	- Adapted to new Index handling
+	  [spamsch]
+
+	- Fixed commandline support for example generation
+	  [spamsch]
+
+	- Added index listing patch for pgsql
+	  [spamsch]
+
+	- Removed custom autoloader stuff
+	  [spamsch]
+
+	- Removed 0.3 specific code
 	  [spamsch]
 
 	- Added support for z3c.sqlalchemy

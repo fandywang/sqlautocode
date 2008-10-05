@@ -25,8 +25,8 @@ License:
 
 Requirements:
 
-    sqlalchemy 0.3.9+
-    Not known to work with 0.4!
+    sqlalchemy 0.4+
+
 
 Documentation:
 
@@ -37,12 +37,14 @@ Documentation:
 
 ToDo:
 
-    + Test with different dialects
     + Add support for automagically creating relations
     + Generate ActiveMapper / Elixir model
 
 Notes (random):
 
-    metadata stuff from:
+    ATT: sqlautocode currently does not handle function indexes well. It generates
+    code not understood by sqlalchemy.
+
+    (old) metadata stuff from:
     http://sqlzoo.cn/howto/source/z.dir/tip137084/i12meta.xml
 
