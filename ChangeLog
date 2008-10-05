@@ -1,5 +1,9 @@
+0.5.2 (UNRELEASED)
+	- Implemented workaround for issue 9: schema handling when no schema is specified.
+	  [jaraco]
+
 0.5.1 (10.01.2008)
-        - Table matching is now chattier about misses.
+    - Table matching is now chattier about misses.
 	  [jek]
         
 	- Table globbing now supports the full glob syntax

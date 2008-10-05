@@ -53,6 +53,11 @@ def main():
         table = sqlalchemy.Table(tname, metadata, schema=reflection_schema,
                                  autoload=True)
         if options.schema is None:
+            # we're going to remove the schema from the table so that it
+            #  isn't rendered in the output.  If we don't put back the
+            #  correct value, it may cause errors when other tables reference
+            #  this one.
+            original_schema = table.schema
             table.schema = None
 
         INC = '\n\n'
@@ -65,6 +70,8 @@ def main():
             emit(INC + ('class %(tn)sObject(MappedClassBase): pass\n'
                              'mapper(%(tn)sObject, %(tn)s)') % {'tn':tname})
 
+        table.schema = original_schema
+        
         # directly print indices after table def
         if not options.noindex:
             indexes = []
