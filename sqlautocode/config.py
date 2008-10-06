@@ -1,4 +1,10 @@
-import optparse, os, sys
+#!python
+#-*- coding: UTF-8 -*-
+
+import optparse
+import os
+import sys
+import re
 
 options = None
 out = sys.stdout
@@ -87,14 +93,10 @@ def _version_check(parser):
     elif version == 'svn':
         pass
     else:
-        try:
-            version_info = tuple([int(i) for i in version.split('.')[:2]])
-            if version_info < (0, 4):
-                parser.error("SQLAlchemy version 0.4.0 or higher is required.")
-        except ValueError:
-            # some versions need some relaxed check
-            print >>err, 'Warning: Could not recognize version %s - please make sure that youre using 0.4.x' % version
-            pass
+        non_numeric = re.compile('[^0-9]*')
+        version_info = tuple([int(i) for i in non_numeric.split(version)])
+        if version_info < (0, 4):
+            parser.error("SQLAlchemy version 0.4.0 or higher is required.")
 
 def _setup_engine(parser, url):
     global engine
