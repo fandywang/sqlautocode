@@ -1,4 +1,7 @@
 0.5.2 (UNRELEASED)
+	- Fixed assignment error in __init__.py (Issue 10)
+	  [spamsch]
+
 	- Added setuptools script for project management.
 	  [jaraco]
 	  

@@ -60,6 +60,8 @@ def main():
             original_schema = table.schema
             table.schema = None
 
+        else: original_schema = options.schema
+
         INC = '\n\n'
         if options.z3c:
             INC = INC + 4*' '
