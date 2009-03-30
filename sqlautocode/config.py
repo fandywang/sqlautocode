@@ -44,6 +44,16 @@ Example: ./autocode.py postgres://user:password@myhost/database -o out.py""")
         action="callback", callback=_prep_tables, type="string", dest="tables")
 
     parser.add_option(
+        "-b", "--table-prefix",
+        help="Prefix for generated SQLAlchemy Table object names",
+        action="store", dest="table_prefix")
+
+    parser.add_option(
+        "-a", "--table-suffix",
+        help="Suffix for generated SQLAlchemy Table object names",
+        action="store", dest="table_suffix")
+
+    parser.add_option(
         "-i", "--noindexes", "--noindex",
         help="Do not emit index information",
         action="store_true", dest="noindex")
@@ -69,7 +79,10 @@ Example: ./autocode.py postgres://user:password@myhost/database -o out.py""")
         action="store_true", dest="z3c")
 
     parser.set_defaults(tables=[],
-                        encoding='utf8')
+                        encoding='utf8',
+                        table_prefix='',
+                        table_suffix='')
+
     return parser
 
 def _prep_tables(option, opt_str, value, parser):

@@ -66,7 +66,7 @@ def main():
         if options.z3c:
             INC = INC + 4*' '
 
-        emit('%s%s = %r' % (INC, tname, table))
+        emit('%s%s%s%s = %r' % (INC, options.table_prefix, tname, options.table_suffix, table))
 
         if options.z3c:
             emit(INC + ('class %(tn)sObject(MappedClassBase): pass\n'
