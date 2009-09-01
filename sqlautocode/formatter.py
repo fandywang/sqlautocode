@@ -101,9 +101,9 @@ def index_repr(index):
             }
     return util.as_out_str(constants.INDEX % data)
 
-
-sqlalchemy.sql.expression._TextClause.__repr__ = textclause_repr
-sqlalchemy.schema.Table.__repr__ = table_repr
-sqlalchemy.schema.Column.__repr__ = column_repr
-sqlalchemy.schema.ForeignKeyConstraint.__repr__ = foreignkeyconstraint_repr
-sqlalchemy.schema.Index.__repr__ = index_repr
+def monkey_patch_sa():
+    sqlalchemy.sql.expression._TextClause.__repr__ = textclause_repr
+    sqlalchemy.schema.Table.__repr__ = table_repr
+    sqlalchemy.schema.Column.__repr__ = column_repr
+    sqlalchemy.schema.ForeignKeyConstraint.__repr__ = foreignkeyconstraint_repr
+    sqlalchemy.schema.Index.__repr__ = index_repr

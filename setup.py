@@ -27,7 +27,7 @@ setup (name = 'sqlautocode',
 		],
 		entry_points = dict(
 			console_scripts = [
-				'sqlautocode = sqlautocode:main',
+				'sqlautocode = sqlautocode.main:main',
 			],
 		),
 		install_requires=[
