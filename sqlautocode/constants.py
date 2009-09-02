@@ -105,8 +105,9 @@ INTERACTIVE = """
 print 'Trying to start IPython shell...',
 try:
     from IPython.Shell import IPShellEmbed
-    print 'Success! Type <ctrl-d> to exit.'
+    print 'Success! Press <ctrl-d> to exit.'
     print 'Available models:%%s'%%%s
+    print '\\nTry something like: session.query(%s).all()'
     ipshell = IPShellEmbed()
     ipshell()
 except:

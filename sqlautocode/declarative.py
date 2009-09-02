@@ -16,9 +16,13 @@ import constants
 from formatter import _repr_coltype_as
 
 def by_name(a, b):
-    return a.name>b.name
+    if a.name>b.name:
+        return 1
+    return -1
 def by__name__(a, b):
-    return a.__name__ > b.__name__
+    if a.__name__ > b.__name__:
+        return 1
+    return -1
 
 def column_repr(self):
     
@@ -125,7 +129,7 @@ class ModelFactory(object):
         if self.config.example or self.config.interactive:
             s.write(constants.EXAMPLE_DECL%models[0].__name__)
         if self.config.interactive:
-            s.write(constants.INTERACTIVE%[model.__name__ for model in models])
+            s.write(constants.INTERACTIVE%([model.__name__ for model in models], models[0].__name__))
         return s.getvalue()
 
     @property
@@ -134,7 +138,7 @@ class ModelFactory(object):
     
     @property
     def models(self):
-        return sorted([self.create_model(table) for table in self.get_non_many_to_many_tables()], by__name__)
+        return sorted((self.create_model(table) for table in self.get_non_many_to_many_tables()), by__name__)
     
     def create_model(self, table):
         #partially borrowed from Jorge Vargas' code
