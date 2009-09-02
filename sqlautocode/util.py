@@ -91,3 +91,53 @@ def glob_intersection(collection, subset):
 
     # ordered sets sure would be nice.
     return list(unique(found)), missing, unmatched
+
+# lifted from http://www.daniweb.com/forums/thread70647.html
+# (pattern, search, replace) regex english plural rules tuple
+rule_tuple = (
+('[ml]ouse$', '([ml])ouse$', '\\1ice'), 
+('child$', 'child$', 'children'), 
+('booth$', 'booth$', 'booths'), 
+('foot$', 'foot$', 'feet'), 
+('ooth$', 'ooth$', 'eeth'), 
+('l[eo]af$', 'l([eo])af$', 'l\\1aves'), 
+('sis$', 'sis$', 'ses'), 
+('man$', 'man$', 'men'), 
+('ife$', 'ife$', 'ives'), 
+('eau$', 'eau$', 'eaux'), 
+('lf$', 'lf$', 'lves'), 
+('[xz]$', '$', 'es'), 
+('[s]$', '$', ''), 
+('[^aeioudgkprt]h$', '$', 'es'), 
+('(qu|[^aeiou])y$', 'y$', 'ies'), 
+('$', '$', 's')
+)
+ 
+def regex_rules(rules=rule_tuple):
+    for line in rules:
+        pattern, search, replace = line
+        yield lambda word: re.search(pattern, word) and re.sub(search, replace, word)
+ 
+def plural(noun):
+    for rule in regex_rules():
+        result = rule(noun)
+        if result: 
+            return result
+
+def name2label(name, schema=None):
+    """
+    Convert a column name to a Human Readable name.
+    borrowed from old TG fastdata code
+    """
+    # Create label from the name:
+    #   1) Convert _ to Nothing
+    #   2) Convert CamelCase to Camel Case
+    #   3) Upcase first character of Each Word
+    # Note: I *think* it would be thread-safe to
+    #       memoize this thing.
+    if schema:
+        if name.startswith(schema+'.'):
+            name = '.'.join(name.split('.')[1:])
+    label = str(''.join([s.capitalize() for s in
+               re.findall(r'([A-Z][a-z0-9]+|[a-z0-9]+|[A-Z0-9]+)', name)]))
+    return label
