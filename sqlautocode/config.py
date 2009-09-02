@@ -78,6 +78,12 @@ Example: ./autocode.py postgres://user:password@myhost/database -o out.py""")
         help="Generate code for use with z3c.sqlalchemy",
         action="store_true", dest="z3c")
 
+    parser.add_option(
+        "-d", "--declarative",
+        help="Generate declarative SA code",
+        action="store_true", dest="declarative")
+
+
     parser.set_defaults(tables=[],
                         encoding='utf8',
                         table_prefix='',

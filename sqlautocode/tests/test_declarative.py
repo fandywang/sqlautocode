@@ -7,6 +7,7 @@ testdb = os.path.abspath(os.path.dirname(__file__))+'/data/devdata.db'
 print testdb
 class DummyConfig:
     engine = 'sqlite:///'+testdb
+    example=True
 
 class TestModelFactory:
     

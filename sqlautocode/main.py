@@ -1,7 +1,7 @@
 import sys
 import config, util, constants
 from util import emit
-
+from declarative import ModelFactory
 
 def main():
     config.configure()
@@ -46,6 +46,14 @@ def main():
     else:
         dialect = 'from sqlalchemy.databases.%s import *\n' % db.name
 
+    if options.declarative:
+        config.example=False
+        if options.example:
+            config.example=True
+        factory = ModelFactory(config)
+        emit(repr(factory))
+        return
+    
     header = options.z3c and constants.HEADER_Z3C or constants.HEADER
     emit(header % {'dialect': dialect, 'encoding': options.encoding})
 
