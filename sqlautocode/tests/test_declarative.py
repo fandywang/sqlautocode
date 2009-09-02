@@ -2,13 +2,16 @@ import os
 from nose.tools import eq_
 from sqlautocode.declarative import ModelFactory
 from sqlalchemy.orm import class_mapper
-testdb = os.path.abspath(os.path.dirname(__file__))+'/data/devdata.db'
+testdb = 'sqlite:///'+os.path.abspath(os.path.dirname(__file__))+'/data/devdata.db'
+#testdb = 'postgres://postgres@localhost/TestUsers'
 
 print testdb
 class DummyConfig:
-    engine = 'sqlite:///'+testdb
-    example=True
-
+    engine  = testdb
+    example = True
+    schema = None
+    #schema = 'pdil_db'
+ 
 class TestModelFactory:
     
     def setup(self):
@@ -63,14 +66,13 @@ class TestModelFactory:
     user_name = Column(u'user_name', String(length=16, convert_unicode=False, assert_unicode=None), nullable=False)
     email_address = Column(u'email_address', String(length=255, convert_unicode=False, assert_unicode=None), nullable=False)
     display_name = Column(u'display_name', String(length=255, convert_unicode=False, assert_unicode=None))
-    town_id = Column(u'town_id', Integer(), ForeignKey('tg_town.town_id'))
     password = Column(u'password', String(length=80, convert_unicode=False, assert_unicode=None))
     created = Column(u'created', DateTime(timezone=False))
+    town_id = Column(u'town_id', Integer(), ForeignKey('tg_town.town_id'))
 
     #relation definitions
     tg_town = relation('TgTown')
     tg_groups = relation('TgGroup', secondary=tg_user_group)
-
 """
         eq_(r.strip(), expected.strip())
     
@@ -84,19 +86,19 @@ from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relation
 
-engine = create_engine('sqlite:////Users/percious/oss/tgdev/src/sqlautocode/sqlautocode/tests/data/devdata.db')
+engine = create_engine('sqlite:////Users/cperkins1/nrel/pdil/src/sqlautocode/sqlautocode/tests/data/devdata.db')
 DeclarativeBase = declarative_base()
 metadata = DeclarativeBase.metadata
 metadata.bind = engine
 
 tg_group_permission = tg_group_permission = Table(u'tg_group_permission', metadata,
-    Column(u'group_id', Integer(), ForeignKey('tg_group.group_id')),
-    Column(u'permission_id', Integer(), ForeignKey('tg_permission.permission_id')),
+    Column(u'group_id', Integer(), ForeignKey('tg_group.group_id'), primary_key=True, nullable=False),
+    Column(u'permission_id', Integer(), ForeignKey('tg_permission.permission_id'), primary_key=True, nullable=False),
 )
 
 tg_user_group = tg_user_group = Table(u'tg_user_group', metadata,
-    Column(u'user_id', Integer(), ForeignKey('tg_user.user_id')),
-    Column(u'group_id', Integer(), ForeignKey('tg_group.group_id')),
+    Column(u'user_id', Integer(), ForeignKey('tg_user.user_id'), primary_key=True, nullable=False),
+    Column(u'group_id', Integer(), ForeignKey('tg_group.group_id'), primary_key=True, nullable=False),
 )
 
 class TgPermission(DeclarativeBase):
@@ -116,7 +118,7 @@ class TgTown(DeclarativeBase):
 
     #column definitions
     town_id = Column(u'town_id', Integer(), primary_key=True, nullable=False)
-    town_name = Column(u'town_name', String(length=16, convert_unicode=False, assert_unicode=None), nullable=False)
+    town_name = Column(u'town_name', String(length=255, convert_unicode=False, assert_unicode=None))
 
     #relation definitions
     tg_users = relation('TgUser')
@@ -144,9 +146,9 @@ class TgUser(DeclarativeBase):
     user_name = Column(u'user_name', String(length=16, convert_unicode=False, assert_unicode=None), nullable=False)
     email_address = Column(u'email_address', String(length=255, convert_unicode=False, assert_unicode=None), nullable=False)
     display_name = Column(u'display_name', String(length=255, convert_unicode=False, assert_unicode=None))
-    town_id = Column(u'town_id', Integer(), ForeignKey('tg_town.town_id'))
     password = Column(u'password', String(length=80, convert_unicode=False, assert_unicode=None))
     created = Column(u'created', DateTime(timezone=False))
+    town_id = Column(u'town_id', Integer(), ForeignKey('tg_town.town_id'))
 
     #relation definitions
     tg_town = relation('TgTown')

@@ -47,6 +47,9 @@ def main():
         dialect = 'from sqlalchemy.databases.%s import *\n' % db.name
 
     if options.declarative:
+        config.schema = None
+        if options.schema:
+            config.schema = options.schema
         config.example=False
         if options.example:
             config.example=True
