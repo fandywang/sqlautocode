@@ -1,14 +1,18 @@
 import sys, re, inspect
 from util import emit
-from sqlalchemy.ext.sqlsoup import SqlSoup
-from sqlalchemy import MetaData
-from sqlalchemy.ext.declarative import declarative_base, _deferred_relation
-from sqlalchemy.orm import relation, backref, class_mapper, RelationProperty, Mapper
-from formatter import column_repr, table_repr
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
+
+import sqlalchemy
+from sqlalchemy import MetaData
+from sqlalchemy.ext.declarative import declarative_base, _deferred_relation
+from sqlalchemy.orm import relation, backref, class_mapper, RelationProperty, Mapper
+
+import config
+import constants
+from formatter import _repr_coltype_as
 
 
 # lifted from http://www.daniweb.com/forums/thread70647.html
@@ -65,6 +69,62 @@ metadata = Metadata(bind=create_engine('%s'))
 DeclarativeBase = declarative_base(metadata)
 
 """
+
+def column_repr(self):
+    
+    kwarg = []
+    if self.key != self.name:
+        kwarg.append( 'key')
+
+    if hasattr(self, 'primary_key') and self.primary_key:
+        self.primary_key = True
+        kwarg.append( 'primary_key')
+
+    if not self.nullable:
+        kwarg.append( 'nullable')
+    if self.onupdate:
+        kwarg.append( 'onupdate')
+    if self.default:
+        kwarg.append( 'default')
+    ks = ', '.join('%s=%r' % (k, getattr(self, k)) for k in kwarg)
+
+    name = self.name
+
+    if not hasattr(config, 'options') and config.options.generictypes:
+        coltype = repr(self.type)
+    elif type(self.type).__module__ == 'sqlalchemy.types':
+        coltype = repr(self.type)
+    else:
+        # Try to 'cast' this column type to a cross-platform type
+        # from sqlalchemy.types, dropping any database-specific type
+        # arguments.
+        for base in type(self.type).__mro__:
+            if (base.__module__ == 'sqlalchemy.types' and
+                base.__name__ in sqlalchemy.__all__):
+                coltype = _repr_coltype_as(self.type, base)
+                break
+        # FIXME: if a dialect has a non-standard type that does not
+        # derive from an ANSI type, there's no choice but to ignore
+        # generic-types and output the exact type. However, import
+        # headers have already been output and lack the required
+        # dialect import.
+        else:
+            coltype = repr(self.type)
+
+#    if self.name == 'town_id':
+#        raise
+    data = {'name': self.name,
+            'type': coltype,
+            'constraints': ', '.join(["ForeignKey('%s')"%cn.target_fullname for cn in self.foreign_keys]),
+            'args': ks and ks or '',
+            }
+
+    if data['constraints']:
+        if data['constraints']: data['constraints'] = ', ' + data['constraints']
+    if data['args']:
+        if data['args']: data['args'] = ', ' + data['args']
+
+    return constants.COLUMN % data
 
 class ModelFactory(object):
     
