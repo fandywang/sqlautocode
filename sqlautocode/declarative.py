@@ -86,6 +86,17 @@ objs = session.query(%s).all()
 print objs
 """
 
+interactive = """
+print 'Trying to start IPython shell...',
+try:
+    from IPython.Shell import IPShellEmbed
+    print 'Success! Type <ctrl-d> to exit.'
+    ipshell = IPShellEmbed()
+    ipshell()
+except:
+    'Failed. please easy_install ipython'
+"""
+
 def column_repr(self):
     
     kwarg = []
@@ -178,8 +189,10 @@ class ModelFactory(object):
             s.write(model.__repr__())
             s.write("\n\n")
 
-        if self.config.example:
+        if self.config.example or self.config.interactive:
             s.write(example%models[0].__name__)
+        if self.config.interactive:
+            s.write(interactive)
         return s.getvalue()
 
     @property
@@ -220,7 +233,7 @@ class ModelFactory(object):
                 s = ""
                 s += "class "+model_name+'(DeclarativeBase):\n'
                 s += "    __tablename__ = '%s'\n\n"%table.name
-                if cls.__table_args__:
+                if hasattr(cls, '__table_args__'):
                     s+="    __table_args__ = %s"%cls.__table_args__
                 s += "    #column definitions\n"
                 for column in cls.__table__.c:

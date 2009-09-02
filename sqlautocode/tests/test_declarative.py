@@ -10,7 +10,9 @@ class DummyConfig:
     engine  = testdb
     example = True
     schema = None
+    interactive = None
     #schema = 'pdil_db'
+
  
 class TestModelFactory:
     

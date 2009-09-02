@@ -82,6 +82,11 @@ Example: ./autocode.py postgres://user:password@myhost/database -o out.py""")
         "-d", "--declarative",
         help="Generate declarative SA code",
         action="store_true", dest="declarative")
+    
+    parser.add_option(
+        "-n", "--interactive",
+        help="Generate Interactive example in your code.",
+        action="store_true", dest="interactive")
 
 
     parser.set_defaults(tables=[],
