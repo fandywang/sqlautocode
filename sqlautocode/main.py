@@ -6,6 +6,24 @@ from declarative import ModelFactory
 def main():
     config.configure()
 
+    options = config.options
+    if options.declarative:
+        config.interactive = None
+        if options.interactive:
+            config.interactive = True
+        config.schema = None
+        if options.schema:
+            config.schema = options.schema
+        config.example=False
+        if options.example:
+            config.example=True
+        factory = ModelFactory(config)
+        emit(repr(factory))
+        config.out.close()
+        config.out = sys.stdout
+        print >>config.err, "Output written to %s" % options.output
+        return
+
     import formatter
     formatter.monkey_patch_sa()
     
@@ -46,22 +64,6 @@ def main():
     else:
         dialect = 'from sqlalchemy.databases.%s import *\n' % db.name
 
-    if options.declarative:
-        config.interactive = None
-        if options.interactive:
-            config.interactive = True
-        config.schema = None
-        if options.schema:
-            config.schema = options.schema
-        config.example=False
-        if options.example:
-            config.example=True
-        factory = ModelFactory(config)
-        emit(repr(factory))
-        config.out.close()
-        config.out = sys.stdout
-        print >>config.err, "Output written to %s" % options.output
-        return
     
     header = options.z3c and constants.HEADER_Z3C or constants.HEADER
     emit(header % {'dialect': dialect, 'encoding': options.encoding})

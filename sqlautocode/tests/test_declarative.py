@@ -2,8 +2,8 @@ import os
 from nose.tools import eq_
 from sqlautocode.declarative import ModelFactory
 from sqlalchemy.orm import class_mapper
-#testdb = 'sqlite:///'+os.path.abspath(os.path.dirname(__file__))+'/data/devdata.db'
-testdb = 'postgres://postgres@localhost/TestSamples'
+testdb = 'sqlite:///'+os.path.abspath(os.path.dirname(__file__))+'/data/devdata.db'
+#testdb = 'postgres://postgres@localhost/TestSamples'
 
 print testdb
 class DummyConfig:
@@ -11,7 +11,7 @@ class DummyConfig:
     example = True
     schema = None
     interactive = None
-    schema = ['pdil_samples', 'pdil_tools']
+#    schema = ['pdil_samples', 'pdil_tools']
 
  
 class TestModelFactory:
@@ -53,7 +53,7 @@ class TestModelFactory:
         eq_(columns, ['town_id'])
         
         
-    def test_model__repr__(self):
+    def test_model___repr__(self):
         models = sorted(self._setup_all_models())
         for model in models:
             if model.__name__=='TgUser':

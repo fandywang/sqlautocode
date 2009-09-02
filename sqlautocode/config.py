@@ -34,7 +34,7 @@ Example: ./autocode.py postgres://user:password@myhost/database -o out.py""")
     parser.add_option(
         "-s", "--schema",
         help="Optional, reflect a non-default schema",
-        action="store", dest="schema")
+        action="callback", callback=_prep_schema, type="string", dest="schema")
 
     parser.add_option(
         "-t", "--tables",
@@ -103,6 +103,16 @@ def _prep_tables(option, opt_str, value, parser):
         parser.values.tables = [x.strip()
                                 for x in value.split(',')
                                 if x.strip() != '']
+
+def _prep_schema(option, opt_str, value, parser):
+    #handle multiple schemas on the command line
+    value = [x.strip()
+                for x in value.split(',')
+                if x.strip() != '']
+    if len(value) == 1:
+        parser.values.schema = value[0]
+        return
+    parser.values.schema = value
 
 def _version_check(parser):
     try:

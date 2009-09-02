@@ -86,13 +86,14 @@ class ModelFactory(object):
             if isinstance(schema, (list, tuple)):
                 self.schemas = schema
             else:
-                self.schems = (schema, )
+                self.schemas = (schema, )
             for schema in self.schemas:
                 logging.info('Reflecting database... schema:%s'%schema)
                 self._metadata.reflect(schema=schema)
         else:
             logging.info('Reflecting database...')
-            self._metadata.reflect
+            self._metadata.reflect()
+    
         
         self.DeclarativeBase = declarative_base(metadata=self._metadata)
 
@@ -127,7 +128,7 @@ class ModelFactory(object):
 
     @property
     def tables(self):
-        return sorted(self._metadata.tables.keys())
+        return self._metadata.tables.keys()
     
     @property
     def models(self):
