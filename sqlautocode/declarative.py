@@ -81,11 +81,18 @@ class ModelFactory(object):
         schema = getattr(self.config, 'schema', None)
         self._metadata = MetaData(bind=config.engine)
         kw = {}
+        self.schemas = None
         if schema:
-            kw['schema'] = schema
-            logging.info('Using schema... schema')
-        logging.info('Reflecting database..')
-        self._metadata.reflect(**kw)
+            if isinstance(schema, (list, tuple)):
+                self.schemas = schema
+            else:
+                self.schems = (schema, )
+            for schema in self.schemas:
+                logging.info('Reflecting database... schema:%s'%schema)
+                self._metadata.reflect(schema=schema)
+        else:
+            logging.info('Reflecting database...')
+            self._metadata.reflect
         
         self.DeclarativeBase = declarative_base(metadata=self._metadata)
 
@@ -173,7 +180,7 @@ class ModelFactory(object):
         
         #add in the schema
         if self.config.schema:
-            Temporal.__table_args__ = {'schema':self.config.schema}
+            Temporal.__table_args__ = {'schema':table.schema}
 
         #trick sa's model registry to think the model is the correct name
         if model_name != 'Temporal':
@@ -184,7 +191,7 @@ class ModelFactory(object):
         for column in self.get_foreign_keys(table):
             related_table = column.foreign_keys[0].column.table
             backref_name = plural(table.name)
-            setattr(Temporal, related_table.name, _deferred_relation(Temporal, relation(name2label(related_table.name, self.config.schema), backref=backref(backref_name))))
+            setattr(Temporal, related_table.name, _deferred_relation(Temporal, relation(name2label(related_table.name, related_table.schema), backref=backref(backref_name))))
         
         #add in many-to-many relations
         for join_table in self.get_related_many_to_many_tables(table.name):
@@ -193,7 +200,7 @@ class ModelFactory(object):
                 if key.column.table is not table:
                     related_table = column.foreign_keys[0].column.table
 #                    backref_name = plural(table.name)
-                    setattr(Temporal, plural(related_table.name), _deferred_relation(Temporal, relation(name2label(related_table.name, self.config.schema), secondary=join_table)))
+                    setattr(Temporal, plural(related_table.name), _deferred_relation(Temporal, relation(name2label(related_table.name, related_table.schema), secondary=join_table)))
                     break;
 
         return Temporal
@@ -202,10 +209,13 @@ class ModelFactory(object):
         """(name) -> sqlalchemy.schema.Table
         get the table definition with the given table name
         """
-        if hasattr(self.config, 'schema'):
-            schema = self.config.schema
-            if schema and not name.startswith(schema):
-                name = '.'.join((schema, name))
+        if self.schemas:
+            for schema in self.schemas:
+                if schema and not name.startswith(schema):
+                    new_name = '.'.join((schema, name))
+                table = self._metadata.tables.get(new_name, None)
+                if table:
+                    return table
         return self._metadata.tables[name]
 
     def get_foreign_keys(self, table):
