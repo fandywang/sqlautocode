@@ -15,7 +15,6 @@ import config
 import constants
 from formatter import _repr_coltype_as
 
-
 # lifted from http://www.daniweb.com/forums/thread70647.html
 # (pattern, search, replace) regex english plural rules tuple
 rule_tuple = (
@@ -37,6 +36,11 @@ rule_tuple = (
 ('$', '$', 's')
 )
  
+def by_name(a, b):
+    return a.name>b.name
+def by__name__(a, b):
+    return a.__name__ > b.__name__
+
 def regex_rules(rules=rule_tuple):
     for line in rules:
         pattern, search, replace = line
@@ -197,11 +201,11 @@ class ModelFactory(object):
 
     @property
     def tables(self):
-        return self._metadata.tables.keys()
+        return sorted(self._metadata.tables.keys())
     
     @property
     def models(self):
-        return [self.create_model(table) for table in self.get_non_many_to_many_tables()]
+        return sorted([self.create_model(table) for table in self.get_non_many_to_many_tables()], by__name__)
     
     def create_model(self, table):
         #partially borrowed from Jorge Vargas' code
@@ -236,7 +240,7 @@ class ModelFactory(object):
                 if hasattr(cls, '__table_args__'):
                     s+="    __table_args__ = %s"%cls.__table_args__
                 s += "    #column definitions\n"
-                for column in cls.__table__.c:
+                for column in sorted(cls.__table__.c, by_name):
                     s += "    %s = %s\n"%(column.name, column_repr(column))
                 s += "\n    #relation definitions\n"
                 ess = s
@@ -286,15 +290,16 @@ class ModelFactory(object):
         return self._metadata.tables[name]
 
     def get_foreign_keys(self, table):
-        return [column for column in table.columns if len(column.foreign_keys)>0]
+        return sorted([column for column in table.columns if len(column.foreign_keys)>0], by_name)
 
     def get_many_to_many_tables(self):
         if not hasattr(self, '_many_to_many_tables'):
             self._many_to_many_tables = [table for table in self._metadata.tables.values() if len(self.get_foreign_keys(table)) == 2 and len(table.c) == 2]
-        return self._many_to_many_tables
+        return sorted(self._many_to_many_tables, by_name)
 
     def get_non_many_to_many_tables(self):
-        return [table for table in self._metadata.tables.values() if len(self.get_foreign_keys(table)) != 2 or len(table.c) != 2]
+        tables = [table for table in self._metadata.tables.values() if len(self.get_foreign_keys(table)) != 2 or len(table.c) != 2]
+        return sorted(tables, by_name)
     
     def get_related_many_to_many_tables(self, table_name):
         tables = []
@@ -305,4 +310,4 @@ class ModelFactory(object):
                 if key.column.table is src_table:
                     tables.append(table)
                     break
-        return tables
+        return sorted(tables, by_name)
