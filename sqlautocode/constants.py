@@ -47,6 +47,10 @@ def getModel(metadata):
     model = Model()
 """
 
+PG_IMPORT = """\
+from sqlalchemy.databases.postgres import *
+"""
+
 FOOTER_Z3C = """
     return model
 """
@@ -102,6 +106,7 @@ print 'Trying to start IPython shell...',
 try:
     from IPython.Shell import IPShellEmbed
     print 'Success! Type <ctrl-d> to exit.'
+    print 'Available models:%%s'%%%s
     ipshell = IPShellEmbed()
     ipshell()
 except:

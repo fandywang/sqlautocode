@@ -113,6 +113,8 @@ class ModelFactory(object):
         if not isinstance(engine, basestring):
             engine = str(engine.url)
         s.write(constants.HEADER_DECL%engine)
+        if 'postgres' in engine:
+            s.write(constants.PG_IMPORT)
         for table in tables:
             s.write('%s = %s\n\n'%(table.name, self._table_repr(table)))
         
@@ -123,7 +125,7 @@ class ModelFactory(object):
         if self.config.example or self.config.interactive:
             s.write(constants.EXAMPLE_DECL%models[0].__name__)
         if self.config.interactive:
-            s.write(constants.INTERACTIVE)
+            s.write(constants.INTERACTIVE%[model.__name__ for model in models])
         return s.getvalue()
 
     @property
