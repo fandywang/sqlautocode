@@ -13,7 +13,10 @@ def emit(*lines):
             config.out.write(os.linesep)
         else:
             if isinstance(line, unicode):
-                line = line.encode(config.options.encoding)
+                encoding = 'utf-8'
+                if getattr(config, 'options', None):
+                    encoding = config.options.encoding
+                line = line.encode(encoding)
             config.out.write(line)
             if line[-1] != '\n':
                 config.out.write(os.linesep)
@@ -28,7 +31,10 @@ def as_out_str(obj):
     """Like str(), but convert unicode to configured encoding."""
 
     if isinstance(obj, unicode):
-        return obj.encode(config.options.encoding)
+        encoding = 'utf-8'
+        if getattr(config, 'options', None):
+            encoding = config.options.encoding
+        return obj.encode(encoding)
     elif not isinstance(obj, str):
         return str(obj)
     else:

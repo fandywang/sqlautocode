@@ -47,7 +47,7 @@ class TestModelFactory:
         eq_(columns, ['town_id'])
         
         
-    def test__repr__(self):
+    def test_model__repr__(self):
         models = sorted(self._setup_all_models())
         for model in models:
             if model.__name__=='TgUser':
@@ -71,3 +71,9 @@ class TestModelFactory:
 """
         eq_(r.strip(), expected.strip())
     
+    def test__repr__(self):
+        
+        r = repr(self.factory)
+        print r
+        expected = """"""
+        eq_(r.strip(), expected.strip())
