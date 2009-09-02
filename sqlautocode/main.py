@@ -52,6 +52,9 @@ def main():
             config.example=True
         factory = ModelFactory(config)
         emit(repr(factory))
+        config.out.close()
+        config.out = sys.stdout
+        print >>config.err, "Output written to %s" % options.output
         return
     
     header = options.z3c and constants.HEADER_Z3C or constants.HEADER
