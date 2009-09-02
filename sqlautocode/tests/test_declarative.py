@@ -17,7 +17,10 @@ class TestModelFactory:
     def test_tables(self):
         tables = sorted(self.factory.tables)
         eq_(tables,  [u'tg_group', u'tg_group_permission', u'tg_permission', u'tg_town', u'tg_user', u'tg_user_group'])
-    
+
+    def _setup_all_models(self):
+        return self.factory.models
+
     def test_create_model(self):
         Group      = self.factory.create_model(self.factory._metadata.tables['tg_group'])
         Permission = self.factory.create_model(self.factory._metadata.tables['tg_permission'])
@@ -42,4 +45,29 @@ class TestModelFactory:
     def test_get_foreign_keys(self):
         columns = [column.name for column in sorted(self.factory.get_foreign_keys(self.factory._metadata.tables['tg_user']))]
         eq_(columns, ['town_id'])
+        
+        
+    def test__repr__(self):
+        models = sorted(self._setup_all_models())
+        for model in models:
+            if model.__name__=='TgUser':
+                User = model
+        r = User.__repr__()
+        expected = """class TgUser(DeclarativeBase):
+    __table_name__ = 'tg_user'
+
+    #column definitions
+    user_id = Column(u'user_id', Integer(), primary_key=1, nullable=False)
+    user_name = Column(u'user_name', String(length=16, convert_unicode=False, assert_unicode=None), primary_key=0, nullable=False)
+    email_address = Column(u'email_address', String(length=255, convert_unicode=False, assert_unicode=None), primary_key=0, nullable=False)
+    display_name = Column(u'display_name', String(length=255, convert_unicode=False, assert_unicode=None), primary_key=0)
+    town_id = Column(u'town_id', Integer(), primary_key=0)
+    password = Column(u'password', String(length=80, convert_unicode=False, assert_unicode=None), primary_key=0)
+    created = Column(u'created', DateTime(timezone=False), primary_key=0)
+
+    #relation definitions
+    tg_town = relation(TgTown, backref='tg_users')
+    tg_groups = relation(TgGroup, secondary=tg_user_group)
+"""
+        eq_(r.strip(), expected.strip())
     

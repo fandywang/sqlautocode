@@ -45,7 +45,7 @@ def column_repr(self):
 
     name = self.name
 
-    if not config.options.generictypes:
+    if not hasattr(config, 'options') and config.options.generictypes:
         coltype = repr(self.type)
     elif type(self.type).__module__ == 'sqlalchemy.types':
         coltype = repr(self.type)
