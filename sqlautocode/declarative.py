@@ -102,9 +102,11 @@ class ModelFactory(object):
         self.DeclarativeBase = declarative_base(metadata=self._metadata)
 
     def _table_repr(self, table):
-        s = "%s = Table(u'%s', metadata,\n"%(table.name, table.name)
+        s = "Table(u'%s', metadata,\n"%(table.name)
         for column in table.c:
             s += "    %s,\n"%column_repr(column)
+        if table.schema:
+            s +="    schema='%s'\n"%table.schema
         s+=")"
         return s
     
@@ -127,7 +129,7 @@ class ModelFactory(object):
             s.write("\n\n")
 
         if self.config.example or self.config.interactive:
-            s.write(constants.EXAMPLE_DECL%models[0].__name__)
+            s.write(constants.EXAMPLE_DECL%(models[0].__name__,models[0].__name__))
         if self.config.interactive:
             s.write(constants.INTERACTIVE%([model.__name__ for model in models], models[0].__name__))
         return s.getvalue()
@@ -145,6 +147,7 @@ class ModelFactory(object):
         #http://dpaste.org/V6YS/
         
         model_name = name2label(table.name)
+        is_many_to_many_table = self.is_many_to_many_table(table)
         class Temporal(self.DeclarativeBase):
             __table__ = table
             
@@ -169,12 +172,15 @@ class ModelFactory(object):
                 mapper = class_mapper(cls)
                 s = ""
                 s += "class "+model_name+'(DeclarativeBase):\n'
-                s += "    __tablename__ = '%s'\n\n"%table.name
-                if hasattr(cls, '__table_args__'):
-                    s+="    __table_args__ = %s"%cls.__table_args__
-                s += "    #column definitions\n"
-                for column in sorted(cls.__table__.c, by_name):
-                    s += "    %s = %s\n"%(column.name, column_repr(column))
+                if is_many_to_many_table:
+                    s += "    __table__ = %s\n\n"%table.name
+                else:
+                    s += "    __tablename__ = '%s'\n\n"%table.name
+                    if hasattr(cls, '__table_args__'):
+                        s+="    __table_args__ = %s"%cls.__table_args__
+                    s += "    #column definitions\n"
+                    for column in sorted(cls.__table__.c, by_name):
+                        s += "    %s = %s\n"%(column.name, column_repr(column))
                 s += "\n    #relation definitions\n"
                 ess = s
                 for prop in mapper.iterate_properties:
@@ -203,12 +209,13 @@ class ModelFactory(object):
         #add in many-to-many relations
         for join_table in self.get_related_many_to_many_tables(table.name):
             for column in join_table.columns:
-                key = column.foreign_keys[0]
-                if key.column.table is not table:
-                    related_table = column.foreign_keys[0].column.table
-#                    backref_name = plural(table.name)
-                    setattr(Temporal, plural(related_table.name), _deferred_relation(Temporal, relation(name2label(related_table.name, related_table.schema), secondary=join_table)))
-                    break;
+                if column.foreign_keys:
+                    key = column.foreign_keys[0]
+                    if key.column.table is not table:
+                        related_table = column.foreign_keys[0].column.table
+    #                    backref_name = plural(table.name)
+                        setattr(Temporal, plural(related_table.name), _deferred_relation(Temporal, relation(name2label(related_table.name, related_table.schema), secondary=join_table)))
+                        break;
 
         return Temporal
 
@@ -228,13 +235,19 @@ class ModelFactory(object):
     def get_foreign_keys(self, table):
         return sorted([column for column in table.columns if len(column.foreign_keys)>0], by_name)
 
+    def is_many_to_many_table(self, table):
+        return len(self.get_foreign_keys(table)) == 2
+
+    def is_only_many_to_many_table(self, table):
+        return len(self.get_foreign_keys(table)) == 2 and len(table.c) == 2
+    
     def get_many_to_many_tables(self):
         if not hasattr(self, '_many_to_many_tables'):
-            self._many_to_many_tables = [table for table in self._metadata.tables.values() if len(self.get_foreign_keys(table)) == 2 and len(table.c) == 2]
+            self._many_to_many_tables = [table for table in self._metadata.tables.values() if self.is_many_to_many_table(table)]
         return sorted(self._many_to_many_tables, by_name)
 
     def get_non_many_to_many_tables(self):
-        tables = [table for table in self._metadata.tables.values() if len(self.get_foreign_keys(table)) != 2 or len(table.c) != 2]
+        tables = [table for table in self._metadata.tables.values() if not(self.is_only_many_to_many_table(table))]
         return sorted(tables, by_name)
     
     def get_related_many_to_many_tables(self, table_name):
@@ -242,8 +255,9 @@ class ModelFactory(object):
         src_table = self.get_table(table_name)
         for table in self.get_many_to_many_tables():
             for column in table.columns:
-                key = column.foreign_keys[0]
-                if key.column.table is src_table:
-                    tables.append(table)
-                    break
+                if column.foreign_keys:
+                    key = column.foreign_keys[0]
+                    if key.column.table is src_table:
+                        tables.append(table)
+                        break
         return sorted(tables, by_name)

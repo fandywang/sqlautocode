@@ -98,7 +98,7 @@ EXAMPLE_DECL = """#example on how to query your Schema
 from sqlalchemy.orm import sessionmaker
 session = sessionmaker(bind=engine)()
 objs = session.query(%s).all()
-print objs
+print 'All %s objects: %%s'%%objs
 """
 
 INTERACTIVE = """
