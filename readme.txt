@@ -17,6 +17,9 @@ Authors:
 
     Svilen Dobrev (sdobrev)
     E-Mail: svilen_dobrev at users point sourceforge dot net
+    
+    Chris Perkins (percious)
+    E-mail: chris@percious.com
 
 License:
     

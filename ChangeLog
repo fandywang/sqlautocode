@@ -1,3 +1,14 @@
+0.5.3 
+	  Added declarative generation
+	  [percious]
+	  
+	  Added tests for declarative generation
+	  [percious]
+
+	  Removed monkey-patching for just importing sqlautocode
+	  [percious]
+	  
+	  
 0.5.2 (UNRELEASED)
 	- Added table prefix and suffix options (by Wayne Wight)
 	  [spamsch]
