@@ -95,12 +95,12 @@ DeclarativeBase = declarative_base()
 metadata = DeclarativeBase.metadata
 metadata.bind = engine
 
-tg_group_permission = tg_group_permission = Table(u'tg_group_permission', metadata,
+tg_group_permission = Table(u'tg_group_permission', metadata,
     Column(u'group_id', Integer(), ForeignKey('tg_group.group_id'), primary_key=True, nullable=False),
     Column(u'permission_id', Integer(), ForeignKey('tg_permission.permission_id'), primary_key=True, nullable=False),
 )
 
-tg_user_group = tg_user_group = Table(u'tg_user_group', metadata,
+tg_user_group = Table(u'tg_user_group', metadata,
     Column(u'user_id', Integer(), ForeignKey('tg_user.user_id'), primary_key=True, nullable=False),
     Column(u'group_id', Integer(), ForeignKey('tg_group.group_id'), primary_key=True, nullable=False),
 )
@@ -163,6 +163,6 @@ class TgUser(DeclarativeBase):
 from sqlalchemy.orm import sessionmaker
 session = sessionmaker(bind=engine)()
 objs = session.query(TgGroup).all()
-print objs
+print 'All TgGroup objects: %s'%objs
 """
         eq_(r.strip(), expected.strip())
