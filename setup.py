@@ -5,7 +5,7 @@
 Setup script for building sqlautocode
 """
 
-version = open('version.txt').next().strip()
+version = '0.5.3'
 
 from ez_setup import use_setuptools
 use_setuptools()
