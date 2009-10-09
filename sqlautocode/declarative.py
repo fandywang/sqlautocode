@@ -114,6 +114,7 @@ class ModelFactory(object):
         tables = self.get_many_to_many_tables()
         models = self.models
         
+
         s = StringIO()
         engine = self.config.engine
         if not isinstance(engine, basestring):
@@ -121,9 +122,13 @@ class ModelFactory(object):
         s.write(constants.HEADER_DECL%engine)
         if 'postgres' in engine:
             s.write(constants.PG_IMPORT)
+
+        self.used_table_names = []
         for table in tables:
-            s.write('%s = %s\n\n'%(table.name, self._table_repr(table)))
-        
+            table_name = self.find_new_name(table.name, self.used_table_names)
+            self.used_table_names.append(table_name)
+            s.write('%s = %s\n\n'%(table_name, self._table_repr(table)))
+
         for model in models:
             s.write(model.__repr__())
             s.write("\n\n")
@@ -140,14 +145,30 @@ class ModelFactory(object):
     
     @property
     def models(self):
+        self.used_model_names = []
+        self.used_table_names = []
         return sorted((self.create_model(table) for table in self.get_non_many_to_many_tables()), by__name__)
+    
+    def find_new_name(self, prefix, used, i=0):
+        if i!=0:
+            prefix = "%s%d"%(prefix, i)
+        if prefix in used:
+            prefix = prefix
+            return self.find_new_name(prefix, used, i+1)
+        return prefix
+        
     
     def create_model(self, table):
         #partially borrowed from Jorge Vargas' code
         #http://dpaste.org/V6YS/
         
-        model_name = name2label(table.name)
+        model_name = self.find_new_name(name2label(table.name), self.used_model_names)
+        self.used_model_names.append(model_name)
         is_many_to_many_table = self.is_many_to_many_table(table)
+        table_name = self.find_new_name(table.name, self.used_table_names)
+        self.used_table_names.append(table_name)
+                
+        
         class Temporal(self.DeclarativeBase):
             __table__ = table
             
@@ -169,13 +190,14 @@ class ModelFactory(object):
             
             @classmethod
             def __repr__(cls):
+                
                 mapper = class_mapper(cls)
                 s = ""
                 s += "class "+model_name+'(DeclarativeBase):\n'
                 if is_many_to_many_table:
-                    s += "    __table__ = %s\n\n"%table.name
+                    s += "    __table__ = %s\n\n"%table_name
                 else:
-                    s += "    __tablename__ = '%s'\n\n"%table.name
+                    s += "    __tablename__ = '%s'\n\n"%table_name
                     if hasattr(cls, '__table_args__'):
                         s+="    __table_args__ = %s"%cls.__table_args__
                     s += "    #column definitions\n"
@@ -204,7 +226,7 @@ class ModelFactory(object):
         for column in self.get_foreign_keys(table):
             related_table = column.foreign_keys[0].column.table
             backref_name = plural(table.name)
-            setattr(Temporal, related_table.name, _deferred_relation(Temporal, relation(name2label(related_table.name, related_table.schema), backref=backref(backref_name))))
+            setattr(Temporal, related_table.name, _deferred_relation(Temporal, relation(name2label(related_table.name, related_table.schema))))
         
         #add in many-to-many relations
         for join_table in self.get_related_many_to_many_tables(table.name):
