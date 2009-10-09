@@ -225,8 +225,9 @@ class ModelFactory(object):
         #add in single relations
         for column in self.get_foreign_keys(table):
             related_table = column.foreign_keys[0].column.table
-            backref_name = plural(table.name)
-            setattr(Temporal, related_table.name, _deferred_relation(Temporal, relation(name2label(related_table.name, related_table.schema))))
+            backref_name = plural(table_name)
+            rel = relation(name2label(related_table.name, related_table.schema), backref=backref_name)
+            setattr(Temporal, related_table.name, _deferred_relation(Temporal, rel))
         
         #add in many-to-many relations
         for join_table in self.get_related_many_to_many_tables(table.name):
