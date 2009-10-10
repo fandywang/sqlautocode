@@ -5,10 +5,8 @@
 Setup script for building sqlautocode
 """
 
-version = '0.5.4'
+version = '0.5.5'
 
-from ez_setup import use_setuptools
-use_setuptools()
 from setuptools import setup, find_packages
 
 setup (name = 'sqlautocode',
