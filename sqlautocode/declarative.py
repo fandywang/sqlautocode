@@ -1,4 +1,4 @@
-import sys, re, inspect
+import sys, re, inspect, operator
 import logging
 from util import emit, name2label, plural
 try:
@@ -14,6 +14,13 @@ from sqlalchemy.orm import relation, backref, class_mapper, RelationProperty, Ma
 import config
 import constants
 from formatter import _repr_coltype_as
+
+log = logging.getLogger('saac.decl')
+log.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+log.addHandler(handler)
 
 def by_name(a, b):
     if a.name>b.name:
@@ -82,6 +89,8 @@ class ModelFactory(object):
     
     def __init__(self, config):
         self.config = config
+        self.used_model_names = []
+        self.used_table_names = []
         schema = getattr(self.config, 'schema', None)
         self._metadata = MetaData(bind=config.engine)
         kw = {}
@@ -92,10 +101,10 @@ class ModelFactory(object):
             else:
                 self.schemas = (schema, )
             for schema in self.schemas:
-                logging.info('Reflecting database... schema:%s'%schema)
+                log.info('Reflecting database... schema:%s'%schema)
                 self._metadata.reflect(schema=schema)
         else:
-            logging.info('Reflecting database...')
+            log.info('Reflecting database...')
             self._metadata.reflect()
     
         
@@ -162,6 +171,8 @@ class ModelFactory(object):
         #partially borrowed from Jorge Vargas' code
         #http://dpaste.org/V6YS/
         
+        log.debug('Creating Model from table: %s'%table.name)
+        
         model_name = self.find_new_name(name2label(table.name), self.used_model_names)
         self.used_model_names.append(model_name)
         is_many_to_many_table = self.is_many_to_many_table(table)
@@ -190,7 +201,7 @@ class ModelFactory(object):
             
             @classmethod
             def __repr__(cls):
-                
+                log.debug('repring class with name %s'%cls.__name__)
                 mapper = class_mapper(cls)
                 s = ""
                 s += "class "+model_name+'(DeclarativeBase):\n'
@@ -223,8 +234,12 @@ class ModelFactory(object):
             del Temporal._decl_class_registry['Temporal']
 
         #add in single relations
-        for column in self.get_foreign_keys(table):
-            related_table = column.foreign_keys[0].column.table
+        fks = self.get_foreign_keys(table)
+        for related_table in sorted(fks.keys(), by_name):
+            columns = fks[related_table]
+            if len(columns)>1:
+                continue
+            log.info('    Adding <primary> foreign key for:%s'%related_table.name)
             backref_name = plural(table_name)
             rel = relation(name2label(related_table.name, related_table.schema), backref=backref_name)
             setattr(Temporal, related_table.name, _deferred_relation(Temporal, rel))
@@ -237,6 +252,7 @@ class ModelFactory(object):
                     if key.column.table is not table:
                         related_table = column.foreign_keys[0].column.table
     #                    backref_name = plural(table.name)
+                        log.info('    Adding <secondary> foreign key(%s) for:%s'%(key, related_table.name))
                         setattr(Temporal, plural(related_table.name), _deferred_relation(Temporal, relation(name2label(related_table.name, related_table.schema), secondary=join_table)))
                         break;
 
@@ -256,10 +272,18 @@ class ModelFactory(object):
         return self._metadata.tables[name]
 
     def get_foreign_keys(self, table):
-        return sorted([column for column in table.columns if len(column.foreign_keys)>0], by_name)
+        fks = {}
+        for column in table.columns:
+            if len(column.foreign_keys)>0:
+                fks.setdefault(column.foreign_keys[0].column.table, []).append(column)
+        return fks
 
     def is_many_to_many_table(self, table):
-        return len(self.get_foreign_keys(table)) == 2
+        fks = self.get_foreign_keys(table).values()
+        if len(fks) >= 2:
+            if len(fks[0]) == 1 and len(fks[1]) == 1:
+                return fks[0][0].foreign_keys[0].column.table != fks[1][0].foreign_keys[0].column.table
+        return False
 
     def is_only_many_to_many_table(self, table):
         return len(self.get_foreign_keys(table)) == 2 and len(table.c) == 2
