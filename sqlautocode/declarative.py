@@ -192,7 +192,7 @@ class ModelFactory(object):
                     target = target.class_
                 target = target.__name__
                 secondary = ''
-                if rel.secondary:
+                if rel.secondary == True:
                     secondary = ", secondary=%s"%rel.secondary.name
                 backref=''
 #                if rel.backref:
@@ -202,6 +202,7 @@ class ModelFactory(object):
             @classmethod
             def __repr__(cls):
                 log.debug('repring class with name %s'%cls.__name__)
+                print cls
                 mapper = class_mapper(cls)
                 s = ""
                 s += "class "+model_name+'(DeclarativeBase):\n'
@@ -241,7 +242,7 @@ class ModelFactory(object):
                 continue
             log.info('    Adding <primary> foreign key for:%s'%related_table.name)
             backref_name = plural(table_name)
-            rel = relation(name2label(related_table.name, related_table.schema), backref=backref_name)
+            rel = relation(name2label(related_table.name, related_table.schema))#, backref=backref_name)
             setattr(Temporal, related_table.name, _deferred_relation(Temporal, rel))
         
         #add in many-to-many relations

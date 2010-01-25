@@ -5,16 +5,21 @@ from sqlalchemy.orm import class_mapper
 testdb = 'sqlite:///'+os.path.abspath(os.path.dirname(__file__))+'/data/devdata.db'
 #testdb = 'postgres://postgres@localhost/TestSamples'
 
-print testdb
+from base import make_test_db
+
 class DummyConfig:
-    engine  = testdb
+    
+    
+    def __init__(self, engine=testdb):
+        self.engine  = engine
+    
     example = True
     schema = None
     interactive = None
 #    schema = ['pdil_samples', 'pdil_tools']
 
  
-class TestModelFactory:
+class _TestModelFactory:
     
     def setup(self):
         self.config = DummyConfig()
@@ -159,3 +164,41 @@ objs = session.query(TgGroup).all()
 print 'All TgGroup objects: %s'%objs
 """
         assert expected in r, r
+        
+    
+class TestModelFactoryNew:
+    
+    def setup(self):
+        self.metadata = make_test_db()
+        engine = self.metadata.bind
+        self.config = DummyConfig(engine)
+        self.factory = ModelFactory(self.config)
+        self.factory.models
+    
+    def test_tables(self):
+        tables = sorted(self.factory.tables)
+        eq_(tables,  [u'environment', u'report', u'ui_report'])
+    
+    def test_setup_all_models(self):
+        assert len(self.factory.models) == 3
+    
+    def test_repr_environ_model(self):
+        print self.factory.models
+        s = self.factory.models[0].__repr__()
+        assert s == """\
+class Environment(DeclarativeBase):
+    __tablename__ = 'environment'
+
+    #column definitions
+    database_host = Column(u'database_host', VARCHAR(length=100, convert_unicode=False, assert_unicode=None), nullable=False)
+    database_pass = Column(u'database_pass', VARCHAR(length=100, convert_unicode=False, assert_unicode=None), nullable=False)
+    database_port = Column(u'database_port', VARCHAR(length=5, convert_unicode=False, assert_unicode=None), nullable=False)
+    database_sid = Column(u'database_sid', VARCHAR(length=32, convert_unicode=False, assert_unicode=None), nullable=False)
+    database_user = Column(u'database_user', VARCHAR(length=100, convert_unicode=False, assert_unicode=None), nullable=False)
+    environment_id = Column(u'environment_id', NUMERIC(precision=10, scale=0, asdecimal=True), primary_key=True, nullable=False)
+    environment_name = Column(u'environment_name', VARCHAR(length=100, convert_unicode=False, assert_unicode=None), nullable=False)
+
+    #relation definitions
+    reports = relation('Report')
+""", s
+
