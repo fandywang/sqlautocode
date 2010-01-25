@@ -80,7 +80,7 @@ class TgUser(DeclarativeBase):
 
     #relation definitions
     tg_town = relation('TgTown')
-    tg_groups = relation('TgGroup')
+    tg_groups = relation('TgGroup', secondary=tg_user_group)
 """
         eq_(r.strip(), expected.strip())
     
@@ -120,8 +120,8 @@ class TgGroup(DeclarativeBase):
     group_name = Column(u'group_name', VARCHAR(length=16, convert_unicode=False, assert_unicode=None), nullable=False)
 
     #relation definitions
-    tg_permissions = relation('TgPermission')
-    tg_users = relation('TgUser')
+    tg_permissions = relation('TgPermission', secondary=tg_group_permission)
+    tg_users = relation('TgUser', secondary=tg_user_group)
 
 
 class TgPermission(DeclarativeBase):
@@ -133,7 +133,7 @@ class TgPermission(DeclarativeBase):
     permission_name = Column(u'permission_name', VARCHAR(length=16, convert_unicode=False, assert_unicode=None), nullable=False)
 
     #relation definitions
-    tg_groups = relation('TgGroup')
+    tg_groups = relation('TgGroup', secondary=tg_group_permission)
 
 
 class TgTown(DeclarativeBase):
@@ -160,7 +160,7 @@ class TgUser(DeclarativeBase):
 
     #relation definitions
     tg_town = relation('TgTown')
-    tg_groups = relation('TgGroup')
+    tg_groups = relation('TgGroup', secondary=tg_user_group)
 
 
 #example on how to query your Schema
@@ -205,6 +205,28 @@ class Environment(DeclarativeBase):
     environment_name = Column(u'environment_name', VARCHAR(length=100, convert_unicode=False, assert_unicode=None), nullable=False)
 
     #relation definitions
-    reports = relation('Report')
+    reports = relation('Report', secondary=ui_report)
 """, s
 
+    def test_repr_report(self):
+        s = self.factory.models[1].__repr__()
+        assert s == """class Report(DeclarativeBase):
+    __tablename__ = 'report'
+
+    #column definitions
+    created_by = Column(u'created_by', NUMERIC(precision=10, scale=0, asdecimal=True), nullable=False)
+    created_date = Column(u'created_date', DATETIME(timezone=False), nullable=False)
+    deleted = Column(u'deleted', NUMERIC(precision=1, scale=0, asdecimal=True), nullable=False)
+    deleted_by = Column(u'deleted_by', NUMERIC(precision=10, scale=0, asdecimal=True))
+    deleted_date = Column(u'deleted_date', DATETIME(timezone=False))
+    environment_id = Column(u'environment_id', NUMERIC(precision=10, scale=0, asdecimal=True), ForeignKey('environment.environment_id'), nullable=False)
+    report_description = Column(u'report_description', VARCHAR(length=4000, convert_unicode=False, assert_unicode=None))
+    report_id = Column(u'report_id', NUMERIC(precision=10, scale=0, asdecimal=True), primary_key=True, nullable=False)
+    report_name = Column(u'report_name', VARCHAR(length=50, convert_unicode=False, assert_unicode=None), nullable=False)
+    updated_by = Column(u'updated_by', NUMERIC(precision=10, scale=0, asdecimal=True), nullable=False)
+    updated_date = Column(u'updated_date', DATETIME(timezone=False), nullable=False)
+
+    #relation definitions
+    environment = relation('Environment')
+    environments = relation('Environment', secondary=ui_report)
+""", s

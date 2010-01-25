@@ -192,7 +192,7 @@ class ModelFactory(object):
                     target = target.class_
                 target = target.__name__
                 secondary = ''
-                if rel.secondary == True:
+                if rel.secondary is not None:
                     secondary = ", secondary=%s"%rel.secondary.name
                 backref=''
 #                if rel.backref:
