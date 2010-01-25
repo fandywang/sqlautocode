@@ -202,7 +202,6 @@ class ModelFactory(object):
             @classmethod
             def __repr__(cls):
                 log.debug('repring class with name %s'%cls.__name__)
-                print cls
                 mapper = class_mapper(cls)
                 s = ""
                 s += "class "+model_name+'(DeclarativeBase):\n'
