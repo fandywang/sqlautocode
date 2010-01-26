@@ -25,7 +25,7 @@ def by__name__(a, b):
     return -1
 
 def column_repr(self):
-    
+
     kwarg = []
     if self.key != self.name:
         kwarg.append( 'key')
@@ -79,7 +79,7 @@ def column_repr(self):
     return constants.COLUMN % data
 
 class ModelFactory(object):
-    
+
     def __init__(self, config):
         self.config = config
         schema = getattr(self.config, 'schema', None)
@@ -97,8 +97,7 @@ class ModelFactory(object):
         else:
             logging.info('Reflecting database...')
             self._metadata.reflect()
-    
-        
+
         self.DeclarativeBase = declarative_base(metadata=self._metadata)
 
     def _table_repr(self, table):
@@ -109,11 +108,11 @@ class ModelFactory(object):
             s +="    schema='%s'\n"%table.schema
         s+=")"
         return s
-    
+
     def __repr__(self):
         tables = self.get_many_to_many_tables()
         models = self.models
-        
+
 
         s = StringIO()
         engine = self.config.engine
@@ -124,6 +123,7 @@ class ModelFactory(object):
             s.write(constants.PG_IMPORT)
 
         self.used_table_names = []
+        self.used_model_names = []
         for table in tables:
             table_name = self.find_new_name(table.name, self.used_table_names)
             self.used_table_names.append(table_name)
@@ -142,13 +142,13 @@ class ModelFactory(object):
     @property
     def tables(self):
         return self._metadata.tables.keys()
-    
+
     @property
     def models(self):
         self.used_model_names = []
         self.used_table_names = []
         return sorted((self.create_model(table) for table in self.get_non_many_to_many_tables()), by__name__)
-    
+
     def find_new_name(self, prefix, used, i=0):
         if i!=0:
             prefix = "%s%d"%(prefix, i)
@@ -156,22 +156,22 @@ class ModelFactory(object):
             prefix = prefix
             return self.find_new_name(prefix, used, i+1)
         return prefix
-        
-    
+
+
     def create_model(self, table):
         #partially borrowed from Jorge Vargas' code
         #http://dpaste.org/V6YS/
-        
+
         model_name = self.find_new_name(name2label(table.name), self.used_model_names)
         self.used_model_names.append(model_name)
         is_many_to_many_table = self.is_many_to_many_table(table)
         table_name = self.find_new_name(table.name, self.used_table_names)
         self.used_table_names.append(table_name)
-                
-        
+
+
         class Temporal(self.DeclarativeBase):
             __table__ = table
-            
+
             @classmethod
             def _relation_repr(cls, rel):
                 target = rel.argument
@@ -187,10 +187,10 @@ class ModelFactory(object):
 #                if rel.backref:
 #                    backref=", backref='%s'"%rel.backref.key
                 return "%s = relation('%s'%s%s)"%(rel.key, target, secondary, backref)
-            
+
             @classmethod
             def __repr__(cls):
-                
+
                 mapper = class_mapper(cls)
                 s = ""
                 s += "class "+model_name+'(DeclarativeBase):\n'
@@ -212,7 +212,7 @@ class ModelFactory(object):
 
         #hack the class to have the right classname
         Temporal.__name__ = model_name
-        
+
         #add in the schema
         if self.config.schema:
             Temporal.__table_args__ = {'schema':table.schema}
@@ -228,7 +228,7 @@ class ModelFactory(object):
             backref_name = plural(table_name)
             rel = relation(name2label(related_table.name, related_table.schema), backref=backref_name)
             setattr(Temporal, related_table.name, _deferred_relation(Temporal, rel))
-        
+
         #add in many-to-many relations
         for join_table in self.get_related_many_to_many_tables(table.name):
             for column in join_table.columns:
@@ -263,7 +263,7 @@ class ModelFactory(object):
 
     def is_only_many_to_many_table(self, table):
         return len(self.get_foreign_keys(table)) == 2 and len(table.c) == 2
-    
+
     def get_many_to_many_tables(self):
         if not hasattr(self, '_many_to_many_tables'):
             self._many_to_many_tables = [table for table in self._metadata.tables.values() if self.is_many_to_many_table(table)]
@@ -272,7 +272,7 @@ class ModelFactory(object):
     def get_non_many_to_many_tables(self):
         tables = [table for table in self._metadata.tables.values() if not(self.is_only_many_to_many_table(table))]
         return sorted(tables, by_name)
-    
+
     def get_related_many_to_many_tables(self, table_name):
         tables = []
         src_table = self.get_table(table_name)
