@@ -94,35 +94,65 @@ def glob_intersection(collection, subset):
 
 # lifted from http://www.daniweb.com/forums/thread70647.html
 # (pattern, search, replace) regex english plural rules tuple
-rule_tuple = (
-('[ml]ouse$', '([ml])ouse$', '\\1ice'), 
-('child$', 'child$', 'children'), 
-('booth$', 'booth$', 'booths'), 
-('foot$', 'foot$', 'feet'), 
-('ooth$', 'ooth$', 'eeth'), 
-('l[eo]af$', 'l([eo])af$', 'l\\1aves'), 
-('sis$', 'sis$', 'ses'), 
-('man$', 'man$', 'men'), 
-('ife$', 'ife$', 'ives'), 
-('eau$', 'eau$', 'eaux'), 
-('lf$', 'lf$', 'lves'), 
-('[xz]$', '$', 'es'), 
-('[s]$', '$', ''), 
-('[^aeioudgkprt]h$', '$', 'es'), 
-('(qu|[^aeiou])y$', 'y$', 'ies'), 
+plural_rule_tuple = (
+('[ml]ouse$', '([ml])ouse$', '\\1ice'),
+('child$', 'child$', 'children'),
+('booth$', 'booth$', 'booths'),
+('foot$', 'foot$', 'feet'),
+('ooth$', 'ooth$', 'eeth'),
+('l[eo]af$', 'l([eo])af$', 'l\\1aves'),
+('sis$', 'sis$', 'ses'),
+('man$', 'man$', 'men'),
+('ife$', 'ife$', 'ives'),
+('eau$', 'eau$', 'eaux'),
+('lf$', 'lf$', 'lves'),
+('[xz]$', '$', 'es'),
+('[s]$', '$', ''),
+('[^aeioudgkprt]h$', '$', 'es'),
+('(qu|[^aeiou])y$', 'y$', 'ies'),
 ('$', '$', 's')
 )
- 
-def regex_rules(rules=rule_tuple):
+
+singular_rule_tuple = (
+('[ml]ouse$', '([ml])ouse$', '\\1ice'),
+('children$', 'children$', 'child'),
+('feet$',     'fee$', 'foot'),
+('eeth$',     'eeth$', 'ooth'),
+('l[eo]aves', 'l([eo])af$', 'l\\1af$'),
+('ses$',      'ses$', 'sis'),
+('men$',      'men$', 'man'),
+('ives$',     'ives$', 'ife'),
+('eaux$',     'eaux$', 'eau'),
+('lves$',     'lves$', 'lf'),
+#('[xz]$', '$', 'es'), not sure how to unplural this one
+#('[s]$', '$', ''),
+('pies$' ,    'pies$', 'pie'),
+('ovies$' ,     'ovies$', 'ovie'),
+('ies$' ,     'ies$', 'y'),
+#('(qu|[^aeiou])y$', 'y$', 'ies'),
+('s$',        's$', '')
+)
+
+def regex_rules(rules):
     for line in rules:
         pattern, search, replace = line
         yield lambda word: re.search(pattern, word) and re.sub(search, replace, word)
- 
+
+plural_rules = regex_rules(plural_rule_tuple)
+
 def plural(noun):
-    for rule in regex_rules():
+    for rule in regex_rules(plural_rule_tuple):
         result = rule(noun)
-        if result: 
+        if result:
             return result
+    return noun
+
+def singular(noun):
+    for rule in regex_rules(singular_rule_tuple):
+        result = rule(noun)
+        if result:
+            return result
+    return noun
 
 def name2label(name, schema=None):
     """

@@ -8,11 +8,11 @@ testdb = 'sqlite:///'+os.path.abspath(os.path.dirname(__file__))+'/data/devdata.
 from base import make_test_db
 
 class DummyConfig:
-    
-    
+
+
     def __init__(self, engine=testdb):
         self.engine  = engine
-    
+
     example = True
     schema = None
     interactive = None
@@ -98,7 +98,7 @@ from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relation
 
-engine = create_engine('sqlite:////Users/percious/oss/tgdev/src/sqlautocode/sqlautocode/tests/data/devdata.db')
+engine = create_engine('sqlite:////Users/percious/oss/tgtut/src/sqlautocode/sqlautocode/tests/data/devdata.db')
 DeclarativeBase = declarative_base()
 metadata = DeclarativeBase.metadata
 metadata.bind = engine
@@ -173,24 +173,24 @@ objs = session.query(TgGroup).all()
 print 'All TgGroup objects: %s'%objs
 """
         assert expected in r, r
-        
-    
+
+
 class TestModelFactoryNew:
-    
+
     def setup(self):
         self.metadata = make_test_db()
         engine = self.metadata.bind
         self.config = DummyConfig(engine)
         self.factory = ModelFactory(self.config)
         self.factory.models
-    
+
     def test_tables(self):
         tables = sorted(self.factory.tables)
         eq_(tables,  [u'environment', u'report', u'ui_report'])
-    
+
     def test_setup_all_models(self):
         assert len(self.factory.models) == 3
-    
+
     def test_repr_environ_model(self):
         print self.factory.models
         s = self.factory.models[0].__repr__()

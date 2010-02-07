@@ -1,6 +1,6 @@
 import sys, re, inspect, operator
 import logging
-from util import emit, name2label, plural
+from util import emit, name2label, plural, singular
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -172,7 +172,7 @@ class ModelFactory(object):
         #http://dpaste.org/V6YS/
         log.debug('Creating Model from table: %s'%table.name)
 
-        model_name = self.find_new_name(name2label(table.name), self.used_model_names)
+        model_name = self.find_new_name(singular(name2label(table.name)), self.used_model_names)
         self.used_model_names.append(model_name)
         is_many_to_many_table = self.is_many_to_many_table(table)
         table_name = self.find_new_name(table.name, self.used_table_names)
@@ -240,7 +240,7 @@ class ModelFactory(object):
                 continue
             log.info('    Adding <primary> foreign key for:%s'%related_table.name)
             backref_name = plural(table_name)
-            rel = relation(name2label(related_table.name, related_table.schema))#, backref=backref_name)
+            rel = relation(singular(name2label(related_table.name, related_table.schema)))#, backref=backref_name)
             setattr(Temporal, related_table.name, _deferred_relation(Temporal, rel))
 
         #add in many-to-many relations
@@ -250,9 +250,11 @@ class ModelFactory(object):
                     key = column.foreign_keys[0]
                     if key.column.table is not table:
                         related_table = column.foreign_keys[0].column.table
-    #                    backref_name = plural(table.name)
                         log.info('    Adding <secondary> foreign key(%s) for:%s'%(key, related_table.name))
-                        setattr(Temporal, plural(related_table.name), _deferred_relation(Temporal, relation(name2label(related_table.name, related_table.schema), secondary=join_table)))
+                        setattr(Temporal, plural(related_table.name), _deferred_relation(Temporal,
+                                                                                         relation(singular(name2label(related_table.name,
+                                                                                                             related_table.schema)),
+                                                                                                  secondary=join_table)))
                         break;
 
         return Temporal

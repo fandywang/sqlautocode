@@ -5,7 +5,7 @@
 Setup script for building sqlautocode
 """
 
-version = '0.5.6'
+version = '0.5.7'
 
 from setuptools import setup, find_packages
 
@@ -29,6 +29,7 @@ setup (name = 'sqlautocode',
 			],
 		),
 		install_requires=[
+                    'sqlalchemy'
 		],
 		extras_require = {
 		},
