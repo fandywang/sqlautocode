@@ -8,8 +8,21 @@ except ImportError:
 
 import sqlalchemy
 from sqlalchemy import MetaData
-from sqlalchemy.ext.declarative import declarative_base, _deferred_relation
-from sqlalchemy.orm import relation, backref, class_mapper, RelationProperty, Mapper
+from sqlalchemy.ext.declarative import declarative_base
+try:
+    from sqlalchemy.ext.declarative import _deferred_relationship
+except ImportError:
+    #SA 0.5 support
+    from sqlalchemy.ext.declarative import _deferred_relation as _deferred_relationship
+    
+from sqlalchemy.orm import relation, backref, class_mapper, Mapper
+
+try:
+    from sqlalchemy.orm import RelationshipProperty
+except ImportError:
+    #SA 0.5 support
+    from sqlalchemy.orm import RelationProperty as RelationshipProperty
+
 
 import config
 import constants
@@ -216,7 +229,7 @@ class ModelFactory(object):
                 s += "\n    #relation definitions\n"
                 ess = s
                 for prop in mapper.iterate_properties:
-                    if isinstance(prop, RelationProperty):
+                    if isinstance(prop, RelationshipProperty):
                         s+='    %s\n'%cls._relation_repr(prop)
                 return s
 
@@ -241,7 +254,7 @@ class ModelFactory(object):
             log.info('    Adding <primary> foreign key for:%s'%related_table.name)
             backref_name = plural(table_name)
             rel = relation(singular(name2label(related_table.name, related_table.schema)))#, backref=backref_name)
-            setattr(Temporal, related_table.name, _deferred_relation(Temporal, rel))
+            setattr(Temporal, related_table.name, _deferred_relationship(Temporal, rel))
 
         #add in many-to-many relations
         for join_table in self.get_related_many_to_many_tables(table.name):
@@ -251,7 +264,7 @@ class ModelFactory(object):
                     if key.column.table is not table:
                         related_table = column.foreign_keys[0].column.table
                         log.info('    Adding <secondary> foreign key(%s) for:%s'%(key, related_table.name))
-                        setattr(Temporal, plural(related_table.name), _deferred_relation(Temporal,
+                        setattr(Temporal, plural(related_table.name), _deferred_relationship(Temporal,
                                                                                          relation(singular(name2label(related_table.name,
                                                                                                              related_table.schema)),
                                                                                                   secondary=join_table)))
