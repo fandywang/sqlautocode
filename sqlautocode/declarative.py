@@ -167,9 +167,18 @@ class ModelFactory(object):
 
     @property
     def models(self):
+        if hasattr(self, '_models'):
+            return self._models
         self.used_model_names = []
         self.used_table_names = []
-        return sorted((self.create_model(table) for table in self.get_non_many_to_many_tables()), by__name__)
+        self._models = sorted((self.create_model(table) for table in self.get_non_many_to_many_tables()), by__name__)
+        return self._models
+    
+    def model_table_lookup(self):
+        if hasattr(self, '_model_table_lookup'):
+            return self._model_table_lookup
+        self._model_table_lookup = dict(((m.__table__.name, m) for m in self.models))
+        return self._model_table_lookup
 
     def find_new_name(self, prefix, used, i=0):
         if i!=0:
@@ -191,10 +200,11 @@ class ModelFactory(object):
         table_name = self.find_new_name(table.name, self.used_table_names)
         self.used_table_names.append(table_name)
 
+        mtl = self.model_table_lookup
 
         class Temporal(self.DeclarativeBase):
             __table__ = table
-
+            
             @classmethod
             def _relation_repr(cls, rel):
                 target = rel.argument
@@ -203,13 +213,21 @@ class ModelFactory(object):
                 if isinstance(target, Mapper):
                     target = target.class_
                 target = target.__name__
+                primaryjoin=''
+                lookup = mtl()
+                if rel.primaryjoin is not None:
+#                    import ipdb; ipdb.set_trace()
+                    primaryjoin = ", primaryjoin='%s.%s==%s.%s'"%(lookup[rel.primaryjoin.right.table.name].__name__,
+                                                                                  rel.primaryjoin.right.name,
+                                                                                  lookup[rel.primaryjoin.left.table.name].__name__,
+                                                                                  rel.primaryjoin.left.name)
                 secondary = ''
                 if rel.secondary is not None:
                     secondary = ", secondary=%s"%rel.secondary.name
                 backref=''
 #                if rel.backref:
 #                    backref=", backref='%s'"%rel.backref.key
-                return "%s = relation('%s'%s%s)"%(rel.key, target, secondary, backref)
+                return "%s = relation('%s'%s%s%s)"%(rel.key, target, primaryjoin, secondary, backref)
 
             @classmethod
             def __repr__(cls):
