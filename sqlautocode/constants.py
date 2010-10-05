@@ -9,7 +9,7 @@ Generates python code for a given database schema.
 
 options:
     -h, --help                      Show this help
-    -u URL,         --url URL       Database url (e.g.: postgres://postgres:user@password/Database)
+    -u URL,         --url URL       Database url (e.g.: postgresql+psycopg2://postgres:user@password/Database)
     -o FILE,        --output FILE   Where to put the output (default is stdout)
     -s NAME,        --schema NAME   Name of the schema to output (default is 'default')
     -t T1,T2,.. ,   --tables T1,T2  Name of tables to inspect (default is 'all').
@@ -48,7 +48,10 @@ def getModel(metadata):
 """
 
 PG_IMPORT = """\
-from sqlalchemy.databases.postgres import *
+try:
+    from sqlalchemy.dialects.postgresql import *
+except ImportError:
+    from sqlalchemy.databases.postgres import *
 """
 
 FOOTER_Z3C = """

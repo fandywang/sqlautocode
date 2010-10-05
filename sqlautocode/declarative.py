@@ -265,7 +265,7 @@ class ModelFactory(object):
 #            import ipdb; ipdb.set_trace()
             rel = relation(singular(name2label(related_table.name, related_table.schema)), primaryjoin=column==column.foreign_keys[0].column)#, backref=backref_name)
             setattr(Temporal, related_table.name, _deferred_relationship(Temporal, rel))
-
+        
         """
         #add in many-to-many relations
         for join_table in self.get_related_many_to_many_tables(table.name):
@@ -275,12 +275,15 @@ class ModelFactory(object):
                     if key.column.table is not table:
                         related_table = column.foreign_keys[0].column.table
                         log.info('    Adding <secondary> foreign key(%s) for:%s'%(key, related_table.name))
+                        import ipdb; ipdb.set_trace()
                         setattr(Temporal, plural(related_table.name), _deferred_relationship(Temporal,
                                                                                          relation(singular(name2label(related_table.name,
                                                                                                              related_table.schema)),
-                                                                                                  secondary=join_table)))
+                                                                                                  secondary=join_table
+                                                                                                  secondaryjoin=
+                                                                                                  
+                                                                                                  )))
                         break;
-  
         """
         return Temporal
 
