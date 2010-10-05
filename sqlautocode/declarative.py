@@ -177,7 +177,7 @@ class ModelFactory(object):
     def model_table_lookup(self):
         if hasattr(self, '_model_table_lookup'):
             return self._model_table_lookup
-        self._model_table_lookup = dict(((m.__table__.name, m) for m in self.models))
+        self._model_table_lookup = dict(((m.__table__.name, m.__name__) for m in self.models))
         return self._model_table_lookup
 
     def find_new_name(self, prefix, used, i=0):
@@ -216,11 +216,13 @@ class ModelFactory(object):
                 primaryjoin=''
                 lookup = mtl()
                 if rel.primaryjoin is not None:
-#                    import ipdb; ipdb.set_trace()
-                    primaryjoin = ", primaryjoin='%s.%s==%s.%s'"%(lookup[rel.primaryjoin.right.table.name].__name__,
-                                                                                  rel.primaryjoin.right.name,
-                                                                                  lookup[rel.primaryjoin.left.table.name].__name__,
-                                                                                  rel.primaryjoin.left.name)
+                    right_lookup = lookup.get(rel.primaryjoin.right.table.name, '%s.c.'%rel.primaryjoin.right.table.name)
+                    left_lookup = lookup.get(rel.primaryjoin.left.table.name, '%s.c.'%rel.primaryjoin.left.table.name)
+                    
+                    primaryjoin = ", primaryjoin='%s.%s==%s.%s'"%(left_lookup,
+                                                                  rel.primaryjoin.left.name,
+                                                                  right_lookup,
+                                                                  rel.primaryjoin.right.name)
                 secondary = ''
                 if rel.secondary is not None:
                     secondary = ", secondary=%s"%rel.secondary.name
@@ -282,7 +284,7 @@ class ModelFactory(object):
             backref_name = plural(table_name)
 #            import ipdb; ipdb.set_trace()
             rel = relation(singular(name2label(related_table.name, related_table.schema)), 
-                           primaryjoin=column.foreign_keys[0].column==column)#, backref=backref_name)
+                           primaryjoin=column==column.foreign_keys[0].column)#, backref=backref_name)
             setattr(Temporal, related_table.name, _deferred_relationship(Temporal, rel))
         
         """
