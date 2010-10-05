@@ -281,7 +281,7 @@ class ModelFactory(object):
                 if schema and not name.startswith(schema):
                     new_name = '.'.join((schema, name))
                 table = self._metadata.tables.get(new_name, None)
-                if table:
+                if table is not None:
                     return table
         return self._metadata.tables[name]
 
