@@ -119,7 +119,7 @@ singular_rule_tuple = (
 ('feet$',     'fee$', 'foot'),
 ('eeth$',     'eeth$', 'ooth'),
 ('l[eo]aves', 'l([eo])af$', 'l\\1af$'),
-('ses$',      'ses$', 'sis'),
+('ses$',      'ses$', 's'),
 ('men$',      'men$', 'man'),
 ('ives$',     'ives$', 'ife'),
 ('eaux$',     'eaux$', 'eau'),
@@ -129,6 +129,7 @@ singular_rule_tuple = (
 ('pies$' ,    'pies$', 'pie'),
 ('ovies$' ,     'ovies$', 'ovie'),
 ('ies$' ,     'ies$', 'y'),
+('xes$' ,     'xes$', 'x'),
 #('(qu|[^aeiou])y$', 'y$', 'ies'),
 ('s$',        's$', '')
 )

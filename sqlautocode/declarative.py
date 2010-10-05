@@ -241,7 +241,7 @@ class ModelFactory(object):
                     else:
                         s += "    __tablename__ = '%s'\n\n"%table_name
                         if hasattr(cls, '__table_args__'):
-                            s+="    __table_args__ = %s"%cls.__table_args__
+                            s+="    __table_args__ = %s\n\n"%cls.__table_args__
                         s += "    #column definitions\n"
                         for column in sorted(cls.__table__.c, by_name):
                             s += "    %s = %s\n"%(column.name, column_repr(column))
@@ -281,7 +281,8 @@ class ModelFactory(object):
             log.info('    Adding <primary> foreign key for:%s'%related_table.name)
             backref_name = plural(table_name)
 #            import ipdb; ipdb.set_trace()
-            rel = relation(singular(name2label(related_table.name, related_table.schema)), primaryjoin=column==column.foreign_keys[0].column)#, backref=backref_name)
+            rel = relation(singular(name2label(related_table.name, related_table.schema)), 
+                           primaryjoin=column.foreign_keys[0].column==column)#, backref=backref_name)
             setattr(Temporal, related_table.name, _deferred_relationship(Temporal, rel))
         
         """
