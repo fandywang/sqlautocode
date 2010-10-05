@@ -214,24 +214,31 @@ class ModelFactory(object):
             @classmethod
             def __repr__(cls):
                 log.debug('repring class with name %s'%cls.__name__)
-                mapper = class_mapper(cls)
-                s = ""
-                s += "class "+model_name+'(DeclarativeBase):\n'
-                if is_many_to_many_table:
-                    s += "    __table__ = %s\n\n"%table_name
-                else:
-                    s += "    __tablename__ = '%s'\n\n"%table_name
-                    if hasattr(cls, '__table_args__'):
-                        s+="    __table_args__ = %s"%cls.__table_args__
-                    s += "    #column definitions\n"
-                    for column in sorted(cls.__table__.c, by_name):
-                        s += "    %s = %s\n"%(column.name, column_repr(column))
-                s += "\n    #relation definitions\n"
-                ess = s
-                for prop in mapper.iterate_properties:
-                    if isinstance(prop, RelationshipProperty):
-                        s+='    %s\n'%cls._relation_repr(prop)
-                return s
+                try:
+                    mapper = class_mapper(cls)
+                    s = ""
+                    s += "class "+model_name+'(DeclarativeBase):\n'
+                    if is_many_to_many_table:
+                        s += "    __table__ = %s\n\n"%table_name
+                    else:
+                        s += "    __tablename__ = '%s'\n\n"%table_name
+                        if hasattr(cls, '__table_args__'):
+                            s+="    __table_args__ = %s"%cls.__table_args__
+                        s += "    #column definitions\n"
+                        for column in sorted(cls.__table__.c, by_name):
+                            s += "    %s = %s\n"%(column.name, column_repr(column))
+                    s += "\n    #relation definitions\n"
+                    ess = s
+                    for prop in mapper.iterate_properties:
+                        if isinstance(prop, RelationshipProperty):
+                            s+='    %s\n'%cls._relation_repr(prop)
+                    return s
+                except Exception, e:
+                    log.error("Could not generate class for: %s"%cls.__name__)
+                    from traceback import format_exc
+                    log.error(format_exc())
+                    return ''
+                    
 
         #hack the class to have the right classname
         Temporal.__name__ = model_name
@@ -245,17 +252,21 @@ class ModelFactory(object):
             Temporal._decl_class_registry[model_name] = Temporal._decl_class_registry['Temporal']
             del Temporal._decl_class_registry['Temporal']
 
+        
         #add in single relations
         fks = self.get_foreign_keys(table)
         for related_table in sorted(fks.keys(), by_name):
             columns = fks[related_table]
             if len(columns)>1:
                 continue
+            column = columns[0]
             log.info('    Adding <primary> foreign key for:%s'%related_table.name)
             backref_name = plural(table_name)
-            rel = relation(singular(name2label(related_table.name, related_table.schema)))#, backref=backref_name)
+#            import ipdb; ipdb.set_trace()
+            rel = relation(singular(name2label(related_table.name, related_table.schema)), primaryjoin=column==column.foreign_keys[0].column)#, backref=backref_name)
             setattr(Temporal, related_table.name, _deferred_relationship(Temporal, rel))
 
+        """
         #add in many-to-many relations
         for join_table in self.get_related_many_to_many_tables(table.name):
             for column in join_table.columns:
@@ -269,7 +280,8 @@ class ModelFactory(object):
                                                                                                              related_table.schema)),
                                                                                                   secondary=join_table)))
                         break;
-
+  
+        """
         return Temporal
 
     def get_table(self, name):
