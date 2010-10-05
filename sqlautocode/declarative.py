@@ -18,10 +18,10 @@ except ImportError:
 from sqlalchemy.orm import relation, backref, class_mapper, Mapper
 
 try:
-    from sqlalchemy.orm import RelationshipProperty
-except ImportError:
     #SA 0.5 support
-    from sqlalchemy.orm import RelationProperty as RelationshipProperty
+    from sqlalchemy.orm import RelationProperty
+except ImportError:
+    RelationProperty = None
 
 
 import config
@@ -224,12 +224,20 @@ class ModelFactory(object):
                                                                   right_lookup,
                                                                   rel.primaryjoin.right.name)
                 secondary = ''
+                secondaryjoin = ''
                 if rel.secondary is not None:
                     secondary = ", secondary=%s"%rel.secondary.name
+                    right_lookup = lookup.get(rel.secondaryjoin.right.table.name, '%s.c.'%rel.secondaryjoin.right.table.name)
+                    left_lookup = lookup.get(rel.secondaryjoin.left.table.name, '%s.c.'%rel.secondaryjoin.left.table.name)
+#                    import ipdb; ipdb.set_trace()
+                    secondaryjoin = ", secondaryjoin='%s.%s==%s.%s'"%(left_lookup,
+                                                                  rel.secondaryjoin.left.name,
+                                                                  right_lookup,
+                                                                  rel.secondaryjoin.right.name)
                 backref=''
 #                if rel.backref:
 #                    backref=", backref='%s'"%rel.backref.key
-                return "%s = relation('%s'%s%s%s)"%(rel.key, target, primaryjoin, secondary, backref)
+                return "%s = relation('%s'%s%s%s%s)"%(rel.key, target, primaryjoin, secondary, secondaryjoin, backref)
 
             @classmethod
             def __repr__(cls):
@@ -249,9 +257,11 @@ class ModelFactory(object):
                             s += "    %s = %s\n"%(column.name, column_repr(column))
                     s += "\n    #relation definitions\n"
                     ess = s
-                    for prop in mapper.iterate_properties:
-                        if isinstance(prop, RelationshipProperty):
-                            s+='    %s\n'%cls._relation_repr(prop)
+                    # this is only required in SA 0.5
+                    if RelationProperty: 
+                        for prop in mapper.iterate_properties:
+                            if isinstance(prop, RelationshipProperty):
+                                s+='    %s\n'%cls._relation_repr(prop)
                     return s
                 except Exception, e:
                     log.error("Could not generate class for: %s"%cls.__name__)
@@ -287,25 +297,30 @@ class ModelFactory(object):
                            primaryjoin=column==column.foreign_keys[0].column)#, backref=backref_name)
             setattr(Temporal, related_table.name, _deferred_relationship(Temporal, rel))
         
-        """
+        
         #add in many-to-many relations
         for join_table in self.get_related_many_to_many_tables(table.name):
+
+            primary_column = [c for c in join_table.columns if c.foreign_keys and c.foreign_keys[0].column.table==table][0]
+#            import ipdb; ipdb.set_trace();
+            
             for column in join_table.columns:
                 if column.foreign_keys:
                     key = column.foreign_keys[0]
                     if key.column.table is not table:
-                        related_table = column.foreign_keys[0].column.table
+                        related_column = related_table = column.foreign_keys[0].column
+                        related_table = related_column.table
                         log.info('    Adding <secondary> foreign key(%s) for:%s'%(key, related_table.name))
-                        import ipdb; ipdb.set_trace()
+#                        import ipdb; ipdb.set_trace()
                         setattr(Temporal, plural(related_table.name), _deferred_relationship(Temporal,
                                                                                          relation(singular(name2label(related_table.name,
                                                                                                              related_table.schema)),
-                                                                                                  secondary=join_table
-                                                                                                  secondaryjoin=
-                                                                                                  
+                                                                                                  secondary=join_table,
+                                                                                                  primaryjoin=primary_column.foreign_keys[0].column==primary_column,
+                                                                                                  secondaryjoin=column==related_column
                                                                                                   )))
                         break;
-        """
+        
         return Temporal
 
     def get_table(self, name):
