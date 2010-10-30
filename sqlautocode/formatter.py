@@ -41,6 +41,10 @@ def column_repr(self):
         kwarg.append( 'onupdate')
     if self.default:
         kwarg.append( 'default')
+    elif self.server_default:
+        self.default = self.server_default.arg
+        kwarg.append( 'default')
+
     ks = ', '.join('%s=%r' % (k, getattr(self, k)) for k in kwarg )
 
     name = self.name
