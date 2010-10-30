@@ -5,6 +5,9 @@ that lets you use tables without explicitly defining them.
 
 Current Maintainer:
     
+    Chris Perkins (percious)
+    E-mail: chris@percious.com
+
     Simon Pamies (spamsch)
     E-Mail: s.pamies at banality dot de
 
@@ -18,9 +21,6 @@ Authors:
     Svilen Dobrev (sdobrev)
     E-Mail: svilen_dobrev at users point sourceforge dot net
     
-    Chris Perkins (percious)
-    E-mail: chris@percious.com
-
 License:
     
     MIT
@@ -28,7 +28,7 @@ License:
 
 Requirements:
 
-    sqlalchemy 0.4+
+    sqlalchemy 0.5, 0.6+
 
 
 Documentation:
@@ -40,7 +40,6 @@ Documentation:
 
 ToDo:
 
-    + Add support for automagically creating relations
     + Generate ActiveMapper / Elixir model
 
 Notes (random):
