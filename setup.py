@@ -31,6 +31,7 @@ setup (name = 'sqlautocode',
 		install_requires=[
                     'sqlalchemy'
 		],
+        include_package_data=True,
 		extras_require = {
 		},
 		dependency_links = [
