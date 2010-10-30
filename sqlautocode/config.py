@@ -90,7 +90,7 @@ Example: ./autocode.py postgres://user:password@myhost/database -o out.py""")
 
 
     parser.set_defaults(tables=[],
-                        encoding='utf8',
+                        encoding='utf-8',
                         table_prefix='',
                         table_suffix='')
 

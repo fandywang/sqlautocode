@@ -38,11 +38,11 @@ def main():
         reflection_schema=options.schema
     else:
         try:
-            reflection_schema = db.dialect.get_default_schema_name(conn)
+            reflection_schema = db.dialect._get_default_schema_name(conn)
         except NotImplementedError:
             reflection_schema = None
 
-    tablenames = db.dialect.table_names(conn, reflection_schema)
+    tablenames = db.dialect.get_table_names(conn, reflection_schema)
 
     # fixme: don't set up output until we're sure there's work to do!
     if options.tables:

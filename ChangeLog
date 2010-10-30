@@ -2,6 +2,9 @@
 	  Some more fixes for Issues 16 to 24
 	  [spamsch]
 
+	  Removing support for SA 0.5.x
+	  [spamsch]
+
 0.6b1
 	  Fixes for SA 0.6.x
 	  [percious]
