@@ -33,10 +33,10 @@ Requirements:
 
 Documentation:
 
-    Call autocode.py --help for a list of available self explaining options.
+    Call sqlautocode.py --help for a list of available self explaining options.
 
     Example:
-    autocode.py -o model.py -u postgres://postgres:user@password/MyDatabase -s myschema -t Person*,Download
+    sqlautocode.py -o model.py -u postgres://postgres:user@password/MyDatabase -s myschema -t Person*,Download
 
 ToDo:
 
