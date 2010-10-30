@@ -28,8 +28,7 @@ License:
 
 Requirements:
 
-    sqlalchemy 0.5, 0.6+
-
+    sqlalchemy 0.6+
 
 Documentation:
 
